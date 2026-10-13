@@ -1,0 +1,53 @@
+# Test and live tiers of the PHP web application pri-facilities-request from one image.
+# drez-app-move sets TEST_TAG and LIVE_TAG; LIVE_TAG must equal the manifest's
+# testedTag. Each tier's environment file sits beside this file on the server,
+# readable only by the service account, never in git. No published ports.
+#
+# The database is PostgreSQL on Radiant (<id>_test, <id>_live per D-008). The app
+# keeps uploads, imports and GIS extracts in storage/, so each tier has its own
+# named volume there. facilities/health.php answers without touching the
+# database, and health.php?db=1 answers 503 when PostgreSQL does not. Each
+# env file sets TIER, the PG* lines and AUTH_MODE=proxy (env.template.txt).
+name: pri-facilities-request
+
+services:
+  pri-facilities-request-test:
+    image: pri-facilities-request:${TEST_TAG:?set TEST_TAG to the tag printed by tag.js}
+    env_file:
+      - ./pri-facilities-request-test.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/health.php?db=1') === false ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    volumes:
+      - pri-facilities-request-test-storage:/var/www/html/storage
+    networks:
+      - proxy
+
+  pri-facilities-request-live:
+    image: pri-facilities-request:${LIVE_TAG:?set LIVE_TAG to the manifest testedTag}
+    env_file:
+      - ./pri-facilities-request-live.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/health.php?db=1') === false ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    volumes:
+      - pri-facilities-request-live-storage:/var/www/html/storage
+    networks:
+      - proxy
+
+volumes:
+  pri-facilities-request-test-storage:
+  pri-facilities-request-live-storage:
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}

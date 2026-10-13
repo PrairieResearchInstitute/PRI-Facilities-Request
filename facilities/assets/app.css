@@ -1,0 +1,1254 @@
+/* PRI Facilities Request System — served locally, no CDN (spec Section 4).
+   Mobile first: most reports originate from a phone in front of the problem. */
+
+:root {
+    --ink: #1a1a1a;
+    --paper: #f5f4f1;
+    --panel: #ffffff;
+    --line: #d8d5cf;
+    --accent: #13294b;   /* Illinois blue */
+    --accent2: #e84a27;  /* Illinois orange */
+    --good: #1b6b2f;
+    --bad: #a4210c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.45;
+}
+
+header.site {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 4px solid var(--accent2);
+}
+header.site h1 { margin: 0; font-size: 1.3rem; }
+header.site .sub { margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.85; }
+header.site a { color: #cfd8ea; }
+
+header.site .bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+}
+nav.mainnav a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 1rem;
+    font-size: 0.95rem;
+    border-bottom: 2px solid transparent;
+}
+nav.mainnav a:hover { border-bottom-color: var(--accent2); }
+
+form.devswitch {
+    max-width: 72rem;
+    margin: 0.4rem auto 0;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+form.devswitch select {
+    display: inline;
+    width: auto;
+    font-size: 0.8rem;
+    padding: 0.15rem;
+    margin-left: 0.3rem;
+}
+
+.band {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: bold;
+    color: #fff;
+}
+.band-critical { background: #a4210c; }
+.band-high     { background: #c25400; }
+.band-elevated { background: #8a6d00; }
+.band-routine  { background: #4a5a6a; }
+
+.tabs { margin: 0 0 1rem; }
+.tabs a {
+    display: inline-block;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: #eceae5;
+    color: var(--ink);
+    text-decoration: none;
+    margin-right: 0.25rem;
+}
+.tabs a.active {
+    background: var(--panel);
+    font-weight: bold;
+    border-top: 3px solid var(--accent2);
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-bottom: 0.75rem;
+}
+.filters label { font-size: 0.8rem; }
+.filters input, .filters select { width: auto; min-width: 9rem; }
+.filters button { padding: 0.45rem 0.9rem; }
+
+tr.rowlink { cursor: pointer; }
+tr.rowlink:hover td { background: #f2efe8; }
+.overdue { color: var(--bad); font-weight: bold; }
+.muted { color: #666; font-size: 0.85rem; }
+
+.candidate {
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--accent2);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.5rem;
+    background: #fff;
+}
+.candidate .meta { font-size: 0.82rem; color: #555; }
+
+.itemrow {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    background: #fbfaf8;
+}
+.itemrow h4 { margin: 0 0 0.5rem; }
+
+.stagechain { list-style: none; padding: 0; }
+.stagechain li { padding: 0.3rem 0; border-bottom: 1px dotted var(--line); }
+
+/* Administration is grouped, and the group holding the current screen is
+   the one that opens, so the page starts on the work. */
+main:has(.adminnav) { max-width: 78rem; }
+
+@media (min-width: 62rem) {
+    main:has(.adminnav) {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 1fr);
+        gap: 1.25rem;
+        align-items: start;
+    }
+    /* The two columns are NAMED, not counted. Anything else the page
+       puts in main - the staleness notice, a flash message - spans the
+       full width as a banner. Relying on auto-placement meant the day a
+       data source went stale, its notice took the sidebar's cell and
+       shunted the nav and the body one place along, so the menu came out
+       in the wide column and the content in the narrow one. */
+    main:has(.adminnav) > *:not(.adminnav):not(.adminbody) { grid-column: 1 / -1; }
+    main:has(.adminnav) > .adminnav  { grid-column: 1; }
+    main:has(.adminnav) > .adminbody { grid-column: 2; }
+    .adminnav { position: sticky; top: 0.5rem; }
+}
+
+.adminnav { margin-bottom: 1rem; }
+.navgroup {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    margin-bottom: 0.5rem;
+}
+.navgroup > summary {
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;
+}
+.navgroup[open] > summary { border-bottom: 1px solid var(--line); border-radius: 6px 6px 0 0; }
+.navgroup > summary:hover { background: #f2efe8; }
+.navcount {
+    font-weight: normal;
+    font-size: 0.75rem;
+    color: #6a6a6a;
+    background: #eceae5;
+    border-radius: 9px;
+    padding: 0 0.45rem;
+}
+.navgroup ul { list-style: none; margin: 0; padding: 0.3rem; }
+.navgroup li { margin: 0; }
+.navgroup a {
+    display: block;
+    padding: 0.4rem 0.55rem;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.85rem;
+}
+.navgroup a strong { display: block; color: var(--accent); font-weight: 600; }
+.navgroup a .navhint { display: block; font-size: 0.75rem; color: #6a6a6a; line-height: 1.25; }
+.navgroup a:hover { background: #f2efe8; }
+.navgroup a.active { background: var(--accent); }
+.navgroup a.active strong, .navgroup a.active .navhint { color: #fff; }
+.adminbody { min-width: 0; }
+
+/* Type ahead list, sitting under the field it belongs to. */
+label:has(> [data-typeahead]) { position: relative; }
+ul.typeahead {
+    position: absolute;
+    z-index: 40;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--accent);
+    border-radius: 0 0 4px 4px;
+    max-height: 15rem;
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(19, 41, 75, 0.18);
+}
+ul.typeahead li {
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 0.85rem;
+}
+ul.typeahead li:last-child { border-bottom: none; }
+ul.typeahead li:hover, ul.typeahead li.active { background: #fff3e0; }
+ul.typeahead li.none { color: #6a6a6a; cursor: default; font-style: italic; }
+ul.typeahead .ta-label { display: block; }
+ul.typeahead .ta-hint { display: block; font-size: 0.75rem; color: #6a6a6a; }
+/* Filled-from-the-account fields read as answers, not as questions. */
+input[readonly] { background: #eceae5; color: #33383f; }
+
+/* A quiet line under the choices, not a queue standing in front of them. */
+.worknote {
+    background: #fff5ea;
+    border: 1px solid var(--accent2);
+    border-radius: 6px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.9rem;
+    margin: 1rem 0 0.5rem;
+}
+.worknote a { color: var(--accent); font-weight: bold; }
+
+/* The stage chart: where a request is, and what is still ahead of it. */
+ol.flowchart {
+    list-style: none;
+    counter-reset: stage;
+    margin: 0.5rem 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+ol.flowchart li {
+    counter-increment: stage;
+    flex: 1 1 11rem;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--line);
+    border-radius: 4px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.82rem;
+    background: #fbfaf8;
+}
+ol.flowchart li::before {
+    content: counter(stage) ". ";
+    color: #8a8a8a;
+    font-weight: bold;
+}
+ol.flowchart li strong { display: inline; }
+ol.flowchart li .muted { display: block; font-size: 0.75rem; }
+ol.flowchart li .stageowner {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.15rem;
+}
+ol.flowchart li.done { border-left-color: var(--good); opacity: 0.7; }
+ol.flowchart li.now {
+    border-left-color: var(--accent2);
+    background: #fff5ea;
+    box-shadow: 0 0 0 1px var(--accent2) inset;
+}
+ol.flowchart li.terminal { border-left-style: dashed; }
+
+.filegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.filecard { margin: 0; font-size: 0.78rem; }
+.filecard img {
+    width: 100%;
+    height: 7rem;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+}
+.filecard .filetype {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 7rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #eceae5;
+    font-weight: bold;
+    color: var(--accent);
+}
+.filecard figcaption { margin-top: 0.25rem; word-break: break-word; }
+.filecard figcaption .muted { display: block; font-size: 0.72rem; }
+
+/* A move item that is not being moved stays visible but recedes. */
+tr.rowoff td { opacity: 0.45; }
+#itemtable input[type="text"], #itemtable input:not([type]), #itemtable select { font-size: 0.85rem; }
+#itemtable td { vertical-align: middle; }
+.scroll-x { overflow-x: auto; }
+
+/* ---- building map ---- */
+.maplayout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+@media (min-width: 64rem) {
+    .maplayout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+}
+
+.mapcanvas { min-width: 0; }
+.mapside {
+    min-width: 0;
+    border-left: 1px solid var(--line);
+    padding-left: 1rem;
+    max-height: 40rem;
+    overflow-y: auto;
+}
+@media (max-width: 64rem) {
+    .mapside { border-left: none; border-top: 1px solid var(--line); padding: 1rem 0 0; }
+}
+
+#floorplan {
+    width: 100%;
+    height: auto;
+    max-height: 34rem;
+    background: #fdfdfb;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+#floorplan path.walls {
+    fill: none;
+    stroke: #9a958c;
+    stroke-width: 0.6;
+    vector-effect: non-scaling-stroke;
+}
+#floorplan path.room {
+    stroke: #6f7683;
+    stroke-width: 0.5;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+}
+/* The category colour arrives as a fill attribute, and a CSS fill rule
+   would beat it, so the fallback only applies to rooms carrying none. */
+#floorplan path.room:not([fill]) { fill: #cfd8e6; }
+/* Hover and selection must beat the per room fill attribute. */
+#floorplan path.room:hover, #floorplan path.room:focus {
+    fill: #ffd9a0 !important;
+    outline: none;
+}
+#floorplan path.room.selected {
+    fill: var(--accent2) !important;
+    fill-opacity: 0.8;
+    stroke: var(--accent);
+    stroke-width: 1.4;
+}
+/* An open work order outlines the room, so colour is never the only cue. */
+#floorplan path.room.hasopen {
+    stroke: var(--bad);
+    stroke-width: 1.6;
+    stroke-dasharray: 4 2;
+}
+#floorplan text.roomlabel {
+    fill: #33383f;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    font-family: Arial, sans-serif;
+}
+/* Room fill comes from the published category colour key, applied as a
+   fill attribute, so the plan matches the facilities group's own scheme.
+   Selection and open work orders override it below. */
+#floorplan text.safetymark {
+    fill: #0c5c2f;
+    text-anchor: middle;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 0.8;
+}
+
+.maplegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin: 0.5rem 0;
+    font-size: 0.75rem;
+}
+.legenditem { display: inline-flex; align-items: center; gap: 0.3rem; }
+.swatch {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 1px solid #8a8a8a;
+    border-radius: 2px;
+}
+.swatch.safetyswatch {
+    border: none;
+    color: #0c5c2f;
+    font-size: 0.9rem;
+    line-height: 0.9rem;
+    text-align: center;
+}
+.swatch.openswatch { border: 2px dashed var(--bad); background: transparent; }
+
+.subtabs a { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+.tabbody { padding-top: 0.75rem; }
+.tabbody h4 { margin: 0.9rem 0 0.3rem; }
+.tabbody table { font-size: 0.82rem; }
+
+main { max-width: 60rem; margin: 0 auto; padding: 1rem; }
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+.panel.ok  { border-left: 5px solid var(--good); }
+.panel.err { border-left: 5px solid var(--bad); }
+
+h2 { margin-top: 0; font-size: 1.15rem; }
+h3 { font-size: 1rem; }
+
+.good { color: var(--good); }
+.bad  { color: var(--bad); }
+
+ul.flags li { margin-bottom: 0.4rem; }
+
+table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 0.9rem; }
+th, td { border: 1px solid var(--line); padding: 0.35rem 0.5rem; text-align: left; }
+th { background: #eceae5; }
+
+fieldset {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+}
+legend { font-weight: bold; padding: 0 0.4rem; }
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+}
+@media (min-width: 40rem) {
+    .grid { grid-template-columns: 1fr 1fr; }
+}
+
+label { display: block; font-size: 0.9rem; }
+label.check { margin-top: 0.6rem; }
+label.check input { margin-right: 0.4rem; }
+
+input, select, textarea {
+    display: block;
+    width: 100%;
+    padding: 0.45rem;
+    margin-top: 0.2rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: inherit;
+    background: #fff;
+}
+label.check input { display: inline; width: auto; }
+
+input:focus, select:focus, textarea:focus, button:focus, a:focus {
+    outline: 3px solid var(--accent2);
+    outline-offset: 1px;
+}
+
+.actions { margin-top: 1rem; }
+
+.lede { font-size: 1.05rem; max-width: 46rem; }
+
+.cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 1.25rem 0;
+}
+@media (min-width: 52rem) {
+    .cards { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* The front door: four areas, each opening onto its own requests. The
+   summary has to look and behave like something you press, because on a
+   phone it is the only navigation on the page. */
+details.area {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    margin: 0 0 0.9rem;
+}
+details.area > summary {
+    cursor: pointer;
+    padding: 0.9rem 1.1rem;
+    list-style: none;
+    display: block;
+}
+details.area > summary::-webkit-details-marker { display: none; }
+details.area > summary::before {
+    content: '\25B8';
+    display: inline-block;
+    margin-right: 0.6rem;
+    color: var(--accent);
+    transition: transform 0.12s;
+}
+details.area[open] > summary::before { transform: rotate(90deg); }
+details.area > summary:hover { background: var(--shade, #f4f4f6); }
+/* Title and description on one line, so four closed areas read as four
+   choices rather than four paragraphs. On a phone the description drops
+   under the title, where there is room for it. */
+details.area > summary { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; }
+details.area > summary::before { flex: none; margin-right: 0; }
+.area-title { font-size: 1.2rem; font-weight: bold; flex: none; }
+.area-blurb {
+    color: var(--muted);
+    font-size: 0.9rem;
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+details.area .cards { margin: 0 1.1rem 1.1rem; }
+
+/* A card for something that is coming but is not here yet. It is shown
+   rather than hidden so the shape of the system is visible, and it is
+   plainly marked so nobody clicks it expecting a form. */
+.card-soon {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    border-top: 5px solid var(--line);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    opacity: 0.75;
+}
+.card-soon h3 { margin-top: 0; }
+.soon {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.1rem 0.4rem;
+    vertical-align: middle;
+    color: var(--muted);
+    font-weight: normal;
+}
+
+/* A panel that is also a card: same box, but sitting in the grid. The
+   warning border is for a data source that has gone past its interval. */
+.panel.card { margin: 0; }
+.panel.card-warn { border-left: 5px solid var(--bad); }
+
+/* A link that should read as a button, and a button that should read as
+   a warning about what it is about to do. */
+a.button {
+    display: inline-block;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel);
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+}
+a.button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.danger { color: var(--bad); border-color: var(--bad); }
+
+/* A command meant to be copied rather than read. */
+.snippet {
+    background: var(--shade, #f4f4f6);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+a.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-top: 5px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    color: var(--ink);
+    text-decoration: none;
+}
+a.card:hover, a.card:focus {
+    border-top-color: var(--accent2);
+    box-shadow: 0 2px 8px rgba(19, 41, 75, 0.25);
+}
+a.card h3 { margin: 0 0 0.5rem; color: var(--accent); font-size: 1.1rem; }
+a.card p { margin: 0 0 0.75rem; font-size: 0.92rem; }
+a.card .go {
+    margin-top: auto;
+    font-weight: bold;
+    color: var(--accent2);
+}
+
+.urgent { color: var(--bad); font-weight: bold; }
+.help { font-size: 0.88rem; }
+
+footer.foot {
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+    text-align: right;
+}
+footer.foot a { color: var(--accent); }
+
+button, .btn {
+    display: inline-block;
+    font: inherit;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+}
+button.primary, .btn {
+    background: var(--accent);
+    color: #fff;
+}
+button:hover, .btn:hover { filter: brightness(1.15); }
+
+/* The reconciliation blocks. Monospace because what is in the box is
+   going to be pasted somewhere character for character, and a
+   proportional font hides a stray space. */
+.recblock textarea {
+    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: #fbfaf8;
+}
+.rectotal {
+    float: right;
+    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    font-weight: normal;
+}
+.copied { color: var(--good); margin-left: 0.6rem; font-size: 0.9rem; }
+#recall { font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+          font-size: 0.85rem; background: #fbfaf8; }
+
+/* =====================================================================
+   Data sheet mode.
+
+   A request form is normally a column: one question, then the next, at a
+   comfortable reading width. That is right for somebody reporting a leak
+   from a phone, and wrong for a purchase - which is not a series of
+   questions, it is a document. The people filling it in have the quote in
+   front of them and want to see the whole sheet, the way the paper form
+   they replaced showed it.
+
+   So: wider page, smaller labels, tighter rows, and the sections that
+   belong side by side put side by side. Everything still stacks on a
+   narrow screen, because the same purchase sometimes gets filed from a
+   field station on a laptop.
+   ===================================================================== */
+body.sheet main { max-width: 82rem; }
+
+body.sheet .panel { padding: 0.7rem 0.9rem; margin-bottom: 0.7rem; }
+body.sheet h2 { font-size: 1rem; margin-bottom: 0.4rem; }
+body.sheet h3 { font-size: 0.85rem; margin: 0.6rem 0 0.3rem; }
+body.sheet label { font-size: 0.72rem; color: #4a4a4a; line-height: 1.3; }
+body.sheet input, body.sheet select, body.sheet textarea {
+    padding: 0.25rem 0.35rem;
+    margin-top: 0.08rem;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+body.sheet table { font-size: 0.82rem; margin: 0.3rem 0; }
+body.sheet th, body.sheet td { padding: 0.2rem 0.3rem; }
+body.sheet table input, body.sheet table select { margin-top: 0; }
+body.sheet .actions { margin-top: 0.5rem; }
+body.sheet fieldset { padding: 0.4rem 0.7rem; margin-bottom: 0.5rem; }
+body.sheet p { margin: 0.3rem 0; }
+body.sheet .muted { font-size: 0.78rem; }
+
+/* Two panels abreast, and three where there is room. The sheet's whole
+   argument is that the buyer and the vendor are one glance, not two. */
+.sheetrow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 0.7rem;
+}
+.sheetrow > .panel { margin-bottom: 0; }
+@media (min-width: 60rem) {
+    .sheetrow.two { grid-template-columns: 3fr 2fr; }
+    .sheetrow.even { grid-template-columns: 1fr 1fr; }
+}
+
+/* Inside a sheet panel the fields pack tighter than the standard grid,
+   and short answers get short boxes rather than a whole row each. */
+body.sheet .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.4rem 0.6rem;
+}
+body.sheet .fields .wide { grid-column: 1 / -1; }
+@media (min-width: 60rem) {
+    body.sheet .fields .half { grid-column: span 2; }
+}
+body.sheet .fields textarea { resize: vertical; }
+
+/* The line tables carry the document. They are the one thing on the page
+   allowed to be full width and to scroll on their own. */
+body.sheet .lines table { width: 100%; }
+body.sheet .lines th { font-size: 0.72rem; white-space: nowrap; }
+body.sheet .lines input { width: 100%; }
+body.sheet .lines td.rowno { text-align: right; color: var(--muted); width: 1.6rem; }
+body.sheet .lines td.amount { text-align: right; white-space: nowrap; }
+body.sheet .lines .rowdel {
+    border: none;
+    background: none;
+    color: var(--bad);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.2rem;
+}
+
+/* The running totals sit with the table they total, not three sections
+   away where nobody looks. */
+.sheettotal {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+}
+.sheettotal .big { font-size: 1.05rem; font-weight: bold; }
+.sheettotal .off { color: var(--bad); font-weight: bold; }
+.sheettotal .on  { color: var(--good); }
+
+/* Guidance that is worth keeping but not worth a paragraph of the sheet. */
+body.sheet details.hint { margin: 0.3rem 0; }
+body.sheet details.hint > summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--accent);
+}
+body.sheet details.hint p { font-size: 0.8rem; color: #4a4a4a; }
+
+/* On a sheet the submit is not the end of a scroll, it is the bottom of
+   the page - so it stays there. The height it takes is given back at the
+   foot of the form so nothing hides underneath it. */
+body.sheet .sheetsubmit {
+    position: sticky;
+    bottom: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 0.5rem 0;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    z-index: 5;
+}
+body.sheet .sheetsubmit .running { font-size: 0.85rem; }
+body.sheet .sheetsubmit .running strong { font-size: 1rem; }
+
+/* The sheet gives back the margins a reading page needs and a document
+   does not. Every rule here is worth a line of the form. */
+body.sheet main { padding: 0.6rem 0.75rem 0; }
+body.sheet .sheetrow { gap: 0.6rem; margin-bottom: 0.6rem; }
+body.sheet header.site { padding: 0.55rem 1.25rem; }
+body.sheet header.site h1 { font-size: 1.15rem; }
+body.sheet .panel.lines { padding-bottom: 0.5rem; }
+body.sheet .fields textarea { min-height: 3.6rem; }
+
+/* Where the work is sitting, as tiles rather than a sentence. Each one is
+   a link to the list it counts, because a number nobody can click is a
+   number somebody has to go and find. */
+.statrow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.6rem;
+    margin: 0.6rem 0;
+}
+.stat {
+    display: block;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: #fbfaf8;
+    text-decoration: none;
+    color: inherit;
+}
+.stat:hover { background: #f2efe9; border-color: var(--accent); }
+.statn {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1.1;
+    color: var(--accent);
+}
+.statl { display: block; font-size: 0.78rem; color: #4a4a4a; }
+
+/* Small forms that sit inside a table cell rather than owning a panel. */
+form.inline { display: flex; gap: 0.25rem; align-items: center; margin: 0; }
+form.inline input, form.inline select { margin: 0; width: auto; }
+form.inline button { padding: 0.2rem 0.5rem; font-size: 0.8rem; }
+
+ul.plain { list-style: none; padding-left: 0; }
+ul.plain li { margin-bottom: 0.4rem; }
+tr.warn td { background: #fdf6e3; }
+
+/* =====================================================================
+   Phone mode: the mileage page.
+
+   Somebody is standing beside a truck in the cold, one-handed, possibly
+   in gloves. Everything is bigger, there is less of it, and the one
+   number that matters is the size of a number on a dashboard.
+   ===================================================================== */
+body.phone main { max-width: 30rem; padding: 0.75rem; }
+body.phone .panel { padding: 1rem; }
+body.phone label { font-size: 0.95rem; }
+body.phone input, body.phone select {
+    padding: 0.7rem 0.6rem;
+    font-size: 1.1rem;
+}
+body.phone .bigfield input {
+    font-size: 2.2rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-align: center;
+    font-family: "Cascadia Mono", Consolas, monospace;
+}
+body.phone button.big, body.phone .btn.big {
+    font-size: 1.15rem;
+    padding: 0.8rem 1.4rem;
+    width: 100%;
+}
+body.phone .bignum {
+    font-size: 2.4rem;
+    font-weight: bold;
+    margin: 0.2rem 0;
+    font-family: "Cascadia Mono", Consolas, monospace;
+}
+body.phone .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+body.phone .actions .btn { flex: 1 1 8rem; text-align: center; }
+body.phone details.panel summary { cursor: pointer; font-weight: bold; }
+
+/* The printed stickers. One page of labels, cut out, one per cab. */
+.labels {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.5in, 1fr));
+    gap: 0.18in;
+}
+.label {
+    border: 1px dashed #999;
+    border-radius: 4px;
+    padding: 0.12in;
+    display: flex;
+    gap: 0.12in;
+    align-items: center;
+    break-inside: avoid;
+    background: #fff;
+}
+.label svg { width: 1.15in; height: 1.15in; flex: none; }
+.label .who { font-size: 9pt; line-height: 1.25; min-width: 0; }
+.label .fleetno { font-size: 15pt; font-weight: bold; display: block; }
+.label .what { color: #333; overflow-wrap: anywhere; }
+.label .say { font-size: 7.5pt; color: #555; margin-top: 0.04in; }
+
+@media print {
+    header.site, nav, .noprint, footer { display: none !important; }
+    main { max-width: none !important; padding: 0 !important; }
+    .panel { border: none !important; padding: 0 !important; margin: 0 !important; }
+    .label { border-color: #bbb; }
+    @page { margin: 0.4in; }
+}
+
+/* The PRIOps lockup in the banner. */
+.brandmark { display: inline-flex; align-items: center; gap: .6rem;
+             margin-bottom: .15rem; }
+.brandword { font-family: Arial, 'Segoe UI', sans-serif; font-weight: 800;
+             font-size: 1.7rem; letter-spacing: .06em; line-height: 1; }
+/* When the lockup is the heading it carries its own size, so the h1
+   adds nothing but the browser's default margin and font size. */
+header.site h1.brandonly { margin: 0; font-size: 0; line-height: 1; }
+.brandword b { color: #fff; font-weight: 800; }
+.brandword i { color: #8FA9C4; font-style: normal; font-weight: 800; }
+
+/* =====================================================================
+   Demonstration capture mode (?demo=...): the page drops its header and
+   any preamble panel so a job-aid screenshot starts at the form itself.
+   Nothing here affects normal use - the class is only set for a demo
+   fill, which is read-only by construction.
+   ===================================================================== */
+body.demo header.site,
+body.demo main > .panel:first-child:not(:has(form)) { display: none; }
+body.demo main { padding-top: 0.35rem; }
+
+/* ── The Studio ────────────────────────────────────────────────────────
+   The application's own source, edited from inside it. The shape is
+   borrowed from WebDesigner Studio because it solved the same problem:
+   a rail of what you can open, the thing you are working on in the
+   middle, what is true about it on the right, and what just happened
+   along the bottom. It takes the whole window - a code editor in a
+   60rem column would be a worse tool than the one it replaces. */
+
+body.studio main {
+    max-width: none;
+    padding: 0;
+}
+
+.studio-wrap {
+    display: flex;
+    flex-direction: column;
+    /* The header and the campus footer keep their space; the Studio
+       takes everything between them and never scrolls as a page. */
+    height: calc(100vh - 8.5rem);
+    min-height: 30rem;
+    border-top: 1px solid var(--line);
+}
+
+.studio-topbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.9rem;
+    background: var(--paper, #f5f1e8);
+    border-bottom: 1px solid var(--line);
+}
+
+.studio-where { font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.studio-crumb { color: var(--muted, #6b7280); }
+.studio-idle  { color: var(--muted, #6b7280); font-style: italic; }
+
+.studio-actions { display: flex; align-items: center; gap: 0.6rem; flex: none; }
+
+/* The environment is stated because the same screen edits a test copy
+   and the live institute, and the difference matters more here than
+   anywhere else in the application. */
+.studio-env {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--muted, #6b7280);
+}
+.studio-env-production {
+    background: #fdece7;
+    border-color: #c7461f;
+    color: #8a3a12;
+    font-weight: bold;
+}
+
+.studio-save {
+    background: var(--navy, #13294b);
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    padding: 0.4rem 1.1rem;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+.studio-save:hover { background: #1d3f6e; }
+
+/* Three regions, and only the middle one is allowed to be large. */
+.studio-body { flex: 1; display: flex; min-height: 0; }
+
+.studio-rail {
+    width: 16rem;
+    flex: none;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: #fbfaf7;
+}
+.studio-filter { flex: none; padding: 0.5rem; border-bottom: 1px solid var(--line); }
+.studio-filter input { width: 100%; box-sizing: border-box; font: inherit; padding: 0.35rem 0.5rem; }
+.studio-tree { flex: 1; overflow-y: auto; padding: 0.25rem 0; }
+
+.studio-group > summary {
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--navy, #13294b);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.studio-group > summary:hover { background: #eef1f5; }
+.studio-count { color: var(--muted, #6b7280); font-weight: normal; }
+.studio-group ul { list-style: none; margin: 0 0 0.35rem; padding: 0; }
+
+.studio-file {
+    display: block;
+    padding: 0.22rem 0.6rem 0.22rem 1.4rem;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.82rem;
+    color: var(--ink, #2b2b2b);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.studio-file:hover { background: #eef1f5; }
+.studio-file.active { background: var(--navy, #13294b); color: #fff; font-weight: bold; }
+
+/* The editor. The gutter scrolls with the text rather than beside it,
+   so a four hundred line file still lines up at the bottom. */
+.studio-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.studio-editform { flex: 1; display: flex; min-height: 0; }
+.studio-editor { flex: 1; display: flex; min-height: 0; background: #fff; }
+
+.studio-gutter {
+    flex: none;
+    margin: 0;
+    padding: 0.6rem 0.5rem 0.6rem 0.75rem;
+    text-align: right;
+    color: #9aa4b2;
+    background: #f7f8fa;
+    border-right: 1px solid var(--line);
+    overflow: hidden;
+    user-select: none;
+}
+.studio-gutter,
+.studio-editor textarea {
+    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.studio-editor textarea {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    resize: none;
+    padding: 0.6rem 0.8rem;
+    tab-size: 4;
+    color: var(--ink, #2b2b2b);
+    min-width: 0;
+}
+
+.studio-empty { padding: 3rem 2rem; max-width: 34rem; color: var(--muted, #6b7280); }
+.studio-empty h2 { margin: 0 0 0.5rem; color: var(--navy, #13294b); }
+.studio-empty-note { font-size: 0.85rem; }
+
+.studio-inspector {
+    width: 17rem;
+    flex: none;
+    border-left: 1px solid var(--line);
+    padding: 0.75rem 0.9rem;
+    overflow-y: auto;
+    background: #fbfaf7;
+    font-size: 0.85rem;
+}
+.studio-inspector h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted, #6b7280);
+}
+.studio-inspector h3 + * { margin-top: 0; }
+.studio-inspector h3:not(:first-child) { margin-top: 1.25rem; }
+.studio-hint { color: var(--muted, #6b7280); }
+
+.studio-facts { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; margin: 0; }
+.studio-facts dt { color: var(--muted, #6b7280); }
+.studio-facts dd { margin: 0; font-family: "Cascadia Mono", Consolas, monospace; font-size: 0.8rem; }
+
+.studio-warn {
+    background: #fdece7;
+    border-left: 3px solid #c7461f;
+    padding: 0.5rem 0.6rem;
+    color: #8a3a12;
+}
+
+.studio-backups { list-style: none; margin: 0; padding: 0; }
+.studio-backups li { border-bottom: 1px dotted var(--line); }
+.studio-backups form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+}
+.studio-when { flex: 1; font-size: 0.8rem; }
+.studio-when em { color: var(--muted, #6b7280); font-style: normal; }
+.studio-bytes { color: var(--muted, #6b7280); font-size: 0.75rem; }
+.studio-restore {
+    font: inherit;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.studio-restore:hover { background: var(--navy, #13294b); color: #fff; border-color: var(--navy, #13294b); }
+
+/* What just happened, along the foot, where a terminal would put it. */
+.studio-drawer {
+    flex: none;
+    border-top: 1px solid var(--line);
+    padding: 0.5rem 0.9rem;
+    background: var(--paper, #f5f1e8);
+    font-size: 0.85rem;
+}
+.studio-drawer.quiet .studio-note { color: var(--muted, #6b7280); }
+.studio-note { margin: 0; }
+.studio-note.studio-good { color: #1d7168; font-weight: bold; }
+.studio-note.studio-bad {
+    color: #8a3a12;
+    font-weight: bold;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.8rem;
+}
+
+/* Narrow screens get the rail above the work rather than beside it -
+   this is a desk tool, but it should not be unusable on a laptop. */
+@media (max-width: 60rem) {
+    .studio-body { flex-direction: column; }
+    .studio-rail, .studio-inspector { width: auto; max-height: 12rem; border: 0; border-bottom: 1px solid var(--line); }
+    .studio-wrap { height: auto; }
+    .studio-editor { min-height: 24rem; }
+}
+
+/* The Studio link is marked, because it is not the back end and should
+   not be mistaken for it on the way past. */
+nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
+
+/* ---- Studio: the two halves, and where the databases live ---------- */
+
+/* Files and Database are the same room seen two ways, so the switch sits
+   in the top bar rather than in the rail - the rail belongs to Files. */
+.studio-tabs { display: flex; gap: 0.15rem; flex: none; }
+.studio-tab {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--muted, #6b7280);
+    background: transparent;
+}
+.studio-tab:hover { background: #fff; color: inherit; }
+.studio-tab.on {
+    background: var(--navy, #13294b);
+    border-color: var(--navy, #13294b);
+    color: #fff;
+    font-weight: bold;
+}
+
+.studio-dbbody { overflow: auto; }
+.studio-dbmain { flex: 1; min-width: 0; padding: 1.1rem 1.3rem; overflow: auto; }
+.studio-dbmain h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+
+/* Said plainly and once, at the top, because it is the whole reason the
+   screen exists. */
+.studio-localdb {
+    background: #fdece7;
+    border: 1px solid #c7461f;
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.2rem;
+}
+.studio-localdb h3 { margin: 0 0 0.5rem; color: #8a3a12; }
+.studio-localdb p  { margin: 0 0 0.6rem; font-size: 0.92rem; line-height: 1.5; }
+.studio-localdb p:last-child { margin-bottom: 0; }
+
+.studio-dbtable { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.studio-dbtable th {
+    text-align: left;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted, #6b7280);
+    border-bottom: 1px solid var(--line);
+    padding: 0.35rem 0.6rem 0.35rem 0;
+}
+.studio-dbtable td { padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.studio-dbtable tr.ok  td:nth-child(3) { color: #1d6f42; }
+.studio-dbtable tr.bad td:nth-child(3) { color: #a3200f; }
+.studio-dbtable td:last-child { text-align: right; white-space: nowrap; color: var(--muted, #6b7280); }
+.studio-dbwhat { display: block; font-size: 0.78rem; color: var(--muted, #6b7280); font-weight: normal; }
+
+.studio-dbform { overflow: auto; }
+.studio-dbform label { display: block; margin: 0 0 0.6rem; font-size: 0.85rem; font-weight: bold; }
+.studio-dbform input[type=text], .studio-dbform input:not([type]),
+.studio-dbform input[type=number], .studio-dbform input[type=password],
+.studio-dbform select {
+    display: block;
+    width: 100%;
+    margin-top: 0.2rem;
+    padding: 0.35rem 0.45rem;
+    font: inherit;
+    font-size: 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+}
+.studio-dbform label.studio-check { font-weight: normal; display: flex; gap: 0.4rem; align-items: center; }
+/* "Give up after [ 5 ] seconds" is one sentence and reads as one line. */
+.studio-dbform label.studio-inline { display: flex; align-items: center; gap: 0.4rem; }
+.studio-dbform label.studio-inline input { width: 4rem; margin-top: 0; flex: none; }
+.studio-dbform label.studio-check input { width: auto; margin: 0; }
+/* Test and Save are the point of this column, and the form is taller than
+   most windows - so they stay against the bottom rather than below it. */
+.studio-dbbuttons {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0 0.6rem;
+    position: sticky;
+    bottom: 0;
+    padding: 0.6rem 0;
+    background: var(--paper, #f5f1e8);
+    border-top: 1px solid var(--line);
+}
+.studio-dbbuttons button { flex: 1; }
+
+@media (max-width: 60rem) {
+    .studio-dbbody { flex-direction: column; }
+    .studio-dbform { width: auto; max-height: none; }
+}

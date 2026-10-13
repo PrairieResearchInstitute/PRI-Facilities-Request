@@ -1,0 +1,5 @@
+{
+  "protected": ["../../data/pri-facilities-request/storage", "storage", "config.local.json", "config.php", "tools/php", "tools/odbc"],
+  "generated": [],
+  "reason": "storage holds the uploads, imports, GIS extracts and Studio backups the app writes; on the drive it lives outside the repository in ..\\..\\data\\pri-facilities-request\\storage, the dataFolder named in config.local.json (platform D-014); change it only through the app, after a backup. config.local.json holds this computer's portable settings; only SETUP.bat writes it, through tools/local_config.php. config.php is installer output with the SQL Server connections; change it through Studio, Database, never by hand (AGENTS.md rule 9). tools/php and tools/odbc are the bundled runtime. The ten SQL Server LocalDB databases (.mdf and .ldf in the owner profile folder on drive C:) sit outside this folder: never attach, detach, copy, start or stop them from here."
+}

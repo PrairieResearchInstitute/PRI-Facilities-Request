@@ -1,0 +1,32 @@
+{
+  "title": "PRI Facilities Request System",
+  "author": "M. J. Dreslik",
+  "summary": "PRIOps, the PRI Facilities Request System, replaces the paper and e-mail forms for facilities work, moves, shop services, purchasing, keys, the fleet, space, equipment, incidents and safety plans with one PHP web application. Several PRI staff use it; it runs locally today and moves to Radiant on PostgreSQL later.",
+  "version": "0.1.0",
+  "requirements": [
+    "Windows 10 or 11",
+    "The drive that holds the App_to_Migrate folder, under any drive letter",
+    "PHP 8.3 with pdo_sqlsrv, bundled in tools\\php (git-ignored, copied beside the code)",
+    "The Microsoft ODBC Driver for SQL Server; start-local.bat registers the bundled one",
+    "SQL Server LocalDB, instance (localdb)\\MSSQLLocalDB, holding the ten PRI_Facilities databases on drive C:"
+  ],
+  "install": [
+    "Plug in the drive and open the folder apps\\pri-facilities-request.",
+    "Double-click SETUP.bat once. It finds PHP, writes config.local.json from config.template.json and points storage at ..\\..\\data\\pri-facilities-request when that folder exists.",
+    "On a computer with no config.php, browse to install.php after the first start; the installer writes config.php and then refuses to run again."
+  ],
+  "run": [
+    "Double-click PRI Facilities Request.vbs. The local server starts and the browser opens on the application.",
+    "start-local.bat does the same with a visible console for troubleshooting."
+  ],
+  "settings": [
+    { "key": "dataFolder", "meaning": "Where storage lives, relative to the application folder: ..\\..\\data\\pri-facilities-request. Empty keeps storage in the application folder." },
+    { "key": "tier", "meaning": "local today; test and live once the app runs on Radiant" },
+    { "key": "databaseUrl", "meaning": "Unused until the PostgreSQL port; the SQL Server connections live in config.php, written by install.php" },
+    { "key": "apiBaseUrl", "meaning": "Unused; the app has no separate API service" },
+    { "key": "config.php", "meaning": "Installer output: database connections, environment and timezone. Git-ignored; edited through the Admin settings, never by hand" }
+  ],
+  "data": "Uploads, imports, GIS extracts and Studio backups live outside the application folder, in data\\pri-facilities-request\\storage on the drive. The ten SQL Server LocalDB databases stay on drive C: of the computer that runs them. Nothing in either place is stored in git.",
+  "backups": "The storage folder is copied on a schedule to Backups\\pri-facilities-request on the drive and checked after each copy; the databases are backed up by tools\\backup.ps1. Close the application and eject the drive through Windows before unplugging it.",
+  "support": "M. J. Dreslik maintains the application."
+}

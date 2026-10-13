@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+# Batch files need CRLF to run reliably.
+*.bat text eol=crlf
+
+# .cmd is the same thing to cmd.exe, and only .bat was listed here. The one
+# .cmd in the repository, tools\odbc\install-driver.cmd, registers the ODBC
+# driver elevated on a new machine, has multi-line if blocks, and is the
+# first thing that must work on a computer that has never run the app. It
+# reached the drive with LF endings while the copy that has actually run,
+# in OneDrive, has CRLF.
+*.cmd text eol=crlf

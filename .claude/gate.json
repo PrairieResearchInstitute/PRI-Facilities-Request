@@ -1,0 +1,6 @@
+{
+  "command": "node tools/check.js",
+  "timeoutSec": 180,
+  "healthy": "CHECK OK",
+  "note": "Read-only: config.local.json must exist and name the dataFolder whenever ../../data/pri-facilities-request/storage exists; the app's own paths.php resolves uploads, imports, GIS and Studio storage there; file.php's path for a real stored upload resolves to an existing file; config.php, config.local.json, .mdf, .ldf and .har stay untracked; every tracked PHP file passes php -l with the bundled tools/php. Opens no database (LocalDB stays untouched), starts no server. tools/pg/estate.php must match the shared estate-pg.js (127.0.0.1:5433, the drive runtime, the same pg_ctl arguments) and no tracked file may name the PostgreSQL service on C: (D-011). A failing run ends with CHECK FAILED: n."
+}

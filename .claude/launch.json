@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "facilities",
+      "runtimeExecutable": "tools\\php\\php.exe",
+      "runtimeArgs": [
+        "-S",
+        "localhost:8080",
+        "-t",
+        "facilities"
+      ],
+      "port": 8080
+    }
+  ]
+}

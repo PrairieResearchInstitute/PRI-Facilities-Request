@@ -1,0 +1,106 @@
+node_modules/
+venv/
+__pycache__/
+*.pyc
+dist/
+out/
+build/
+*.dll
+*.exe
+*.msi
+.env
+.env.*
+api-keys.txt
+credentials.json
+token.json
+client_secret*.json
+config.json
+settings.local.json
+Trust Tokens*
+*.tif
+*.tiff
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.zip
+*.7z
+*.db
+*.sqlite
+*.sqlite3
+*.xlsx
+*.xls
+*.csv
+*.pdf
+*.dwg
+*.pptx
+*.mp4
+*.mov
+*.log
+Thumbs.db
+.DS_Store
+
+# Documents - only manuals and readmes belong in the repo
+*.docx
+*.doc
+*.pptx
+*.ppt
+!*README*
+!*readme*
+!*Manual*
+!*manual*
+
+# Written by facilities/install.php, which refuses to run once it exists.
+# Committed, it makes a fresh clone believe it is already installed, and it
+# carries a live app_key: install.php generates one with random_bytes(32).
+# The installer recreates it, so it is output, not source.
+config.php
+config.php.before-split
+
+# Captures, databases and generated output: none of this belongs in the repo.
+*.har
+*.mdf
+*.ldf
+data/
+storage/logs/
+storage/shots/
+
+# Specs, manuals and raw data that feed the app but do not run it.
+reference/
+
+# Portable settings (app-prep): written by SETUP.bat, never committed.
+config.local.json
+config.local.json.tmp
+
+# Drez template entries (app-prep P2).
+*.env
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+keys.dat
+*-DESKTOP-*
+.cache/
+
+# Port test scratch (tests/run-pg.php, tools/pg): scratch data folder and configs.
+tests/.work/
+
+# Installation configuration, not schema. These three seed and amend
+# app.AdminAccess, ref.Surveys, app.Settings and ref.PickLists with this
+# institution own administrator roster and contact addresses. A copy of the
+# application for anyone else should not carry them, and the schema in the
+# other sql/ files stands on its own without them.
+sql/23_real_people.sql
+sql/25_corrections.sql
+sql/28_purchase_fixes.sql
+
+# A browser network capture of the internal site. Captures routinely carry
+# session cookies and authorisation headers, and it is not source.
+*.har
+
+# Browser network capture of the internal site. Captures carry session
+# cookies and authorisation headers, and it is not source.
+*.har

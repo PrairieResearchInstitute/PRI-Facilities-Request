@@ -1,0 +1,14 @@
+{
+  "$comment": "Shape of the file tools/identity_seed.php seed --file reads. Example values only: the real file names real NetIDs and campus groups, so it lives in reference\\ (git-ignored), never in git. people sets the role on a NetID's user row; netids grants an access function to one NetID (app.AdminAccess); groups grants a role or an access function to every member of a campus group, spelled exactly as the proxy passes it in AUTH_GROUPS_HEADER. Roles: staff, coordinator, approver, admin. Functions: director, proxy, facilities, safety, fleet, equipment, inventory, it, finance, deputy, executive, studio. survey is a survey code; leave it out for every survey. A role never takes a survey.",
+  "people": [
+    { "netid": "exampleadmin", "role": "admin", "name": "Example Administrator", "email": "configure-me@example.edu" }
+  ],
+  "netids": [
+    { "netid": "exampledirector", "function": "director", "survey": "INHS", "note": "Example: survey director" }
+  ],
+  "groups": [
+    { "group": "example-pri-facilities-admins", "role": "admin", "note": "Example: system administrators" },
+    { "group": "example-pri-oed-finance", "function": "finance", "note": "Example: OED finance, every survey" },
+    { "group": "example-inhs-facilities", "function": "facilities", "survey": "INHS", "note": "Example: INHS facilities staff" }
+  ]
+}

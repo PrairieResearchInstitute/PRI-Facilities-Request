@@ -1,0 +1,7 @@
+{
+  "tier": "local",
+  "dataFolder": "",
+  "databaseUrl": "",
+  "apiBaseUrl": "",
+  "secrets": {}
+}
