@@ -12,7 +12,7 @@ require_once __DIR__ . '/adminforms.php';
 function fv_building_select(string $name, string $current, bool $mappedOnly = false): void
 {
     echo '<label>Building<select name="' . h($name) . '" onchange="this.form.submit()">'
-       . '<option value="">--Select Building--</option>';
+       . '<option value="">Choose a building</option>';
     foreach (form_buildings() as $b) {
         if ($mappedOnly && (int)$b['Rooms'] === 0) {
             continue;
@@ -29,7 +29,7 @@ function fv_room_select(string $name, string $bldg, string $current, string $lab
     $rooms = form_rooms($bldg);
     echo '<label>' . h($label);
     if ($rooms) {
-        echo '<select name="' . h($name) . '"><option value="">--Select Room--</option>';
+        echo '<select name="' . h($name) . '"><option value="">Choose a room</option>';
         foreach ($rooms as $r) {
             $sel = (string)$r['RoomID'] === $current ? ' selected' : '';
             echo '<option value="' . h($r['RoomID']) . '"' . $sel . '>'
@@ -97,7 +97,7 @@ function fv_keys(): void
             </label>
             <label>Employee status
                 <select name="emp_status">
-                    <option value="">--</option>
+                    <option value="">Choose one</option>
                     <?php foreach (EMP_STATUSES as $s): ?>
                     <option <?= ($edit['EmpStatus'] ?? '') === $s ? 'selected' : '' ?>><?= h($s) ?></option>
                     <?php endforeach; ?>
@@ -108,7 +108,7 @@ function fv_keys(): void
             </label>
             <label>Building
                 <select name="bldg">
-                    <option value="">--Select Building--</option>
+                    <option value="">Choose a building</option>
                     <?php foreach (form_buildings() as $b): ?>
                     <option value="<?= h($b['BldgNumber']) ?>"
                         <?= ($edit['BldgNumber'] ?? '') === $b['BldgNumber'] ? 'selected' : '' ?>>
@@ -144,10 +144,10 @@ function fv_keys(): void
                 </select>
             </label>
             <?php endif; ?>
-            <label style="grid-column:1/-1">Comments
+            <label class="span-all">Comments
                 <input name="notes" value="<?= h((string)($edit['Notes'] ?? '')) ?>">
             </label>
-            <div class="actions" style="grid-column:1/-1">
+            <div class="actions span-all">
                 <button name="action" value="<?= $edit ? 'key_edit' : 'key_issue' ?>" class="primary">
                     <?= $edit ? 'Save changes' : 'Issue key' ?></button>
                 <?php if ($edit): ?><a class="btn" href="admin.php?section=keys">Cancel</a><?php endif; ?>
@@ -164,7 +164,7 @@ function fv_keys(): void
             <?= csrf_field() ?>
             <label>Room
                 <select name="room_code" required>
-                    <option value="">--Select Room--</option>
+                    <option value="">Choose a room</option>
                     <?php
                     /* Both sides are in the keys database: gis.Rooms is
                        in Work, but ref.Rooms is published everywhere and
@@ -185,7 +185,7 @@ function fv_keys(): void
             </label>
             <label>New room key code <input name="new_code" size="10"></label>
             <label>Reason <input name="reason" size="24" placeholder="lock changed, key lost"></label>
-            <button name="action" value="room_rekey">Rekey room</button>
+            <button name="action" value="room_rekey">Rekey Room</button>
         </form>
         <?php if (!$keyed): ?><p class="muted">No room currently holds an active key.</p><?php endif; ?>
     </div>
@@ -230,15 +230,15 @@ function fv_keys(): void
                 <td><?= h((string)$r['IssuedOn']) ?></td>
                 <td>
                     <?php if ($r['KeyState'] === 'Active'): ?>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="key_id" value="<?= (int)$r['RoomKeyID'] ?>">
                         <input type="hidden" name="key_state" value="Returned">
-                        <button name="action" value="key_state">Return key</button>
+                        <button name="action" value="key_state">Return Key</button>
                     </form>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="key_id" value="<?= (int)$r['RoomKeyID'] ?>">
                         <input type="hidden" name="key_state" value="Lost">
-                        <button name="action" value="key_state">Mark lost</button>
+                        <button name="action" value="key_state">Mark Lost</button>
                     </form>
                     <?php endif; ?>
                     <a class="btn" href="admin.php?section=keys&amp;edit=<?= (int)$r['RoomKeyID'] ?>">Edit</a>
@@ -423,7 +423,7 @@ function fv_equipment(): void
             <?= $item['Cost'] !== null ? ' &middot; $' . number_format((float)$item['Cost'], 2) : '' ?>
         </p>
         <p><a class="btn primary" href="new_property.php?item=<?= (int)$item['InventoryID'] ?>">Change
-           this record</a>
+           This Record</a>
            <span class="muted">it moved, somebody else has it, the record is wrong, or it has
            gone &mdash; all on one form</span></p>
         <p><a href="<?= $link(['item' => '']) ?>">Close this item</a></p>
@@ -470,7 +470,7 @@ function fv_equipment(): void
     </div>
     <?php endif; ?>
 
-    <p><a class="btn" href="new_property.php?kind=register">Add something to the inventory</a>
+    <p><a class="btn" href="new_property.php?kind=register">Add Something to the Inventory</a>
        <span class="muted">for property that arrives outside a move: a new purchase, or something
        found during an audit that the inventory never had. The same form, with nothing to find
        first.</span></p>
@@ -499,7 +499,7 @@ function fv_roomassign(): void
             <?php if ($bldg !== ''): ?>
             <label>Room
                 <select name="room_code" onchange="this.form.submit()">
-                    <option value="">--Select Room--</option>
+                    <option value="">Choose a room</option>
                     <?php foreach (form_rooms($bldg) as $r): ?>
                     <option value="<?= h($r['RoomCode']) ?>" <?= $r['RoomCode'] === $roomCode ? 'selected' : '' ?>>
                         <?= h('Floor ' . $r['FloorCode'] . ' · ' . $r['RoomID']
@@ -571,11 +571,11 @@ function fv_roomassign(): void
                 <input name="access" value="<?= h((string)($resp['AccessRestriction'] ?? '')) ?>"
                        placeholder="e.g. keyed access, escort required">
             </label>
-            <label style="grid-column:1/-1">Notes
+            <label class="span-all">Notes
                 <input name="notes" value="<?= h((string)($resp['Notes'] ?? '')) ?>">
             </label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="room_assign" class="primary">Save assignment</button>
+            <div class="actions span-all">
+                <button name="action" value="room_assign" class="primary">Save Assignment</button>
             </div>
         </form>
     </div>
@@ -593,9 +593,11 @@ function fv_roomassign(): void
                 <td><?= $o['PrimaryOffice'] === 'Y' ? 'yes' : '' ?></td>
                 <td class="muted"><?= $o['IsManaged'] ? 'assigned here' : 'C3PO' ?></td>
                 <td>
-                    <form method="post" style="margin:0"><?= csrf_field() ?>
+                    <form method="post" class="flat"><?= csrf_field() ?>
                         <input type="hidden" name="occupant_id" value="<?= (int)$o['OccupantID'] ?>">
-                        <button name="action" value="occupant_remove">Remove</button>
+                        <button name="action" value="occupant_remove" class="danger"
+                            data-confirm="Remove this person from the room?"
+                            data-confirm-title="Remove Occupant" data-confirm-ok="Remove" data-confirm-danger>Remove</button>
                     </form>
                 </td>
             </tr>
@@ -611,17 +613,17 @@ function fv_roomassign(): void
             <label>NetID <input name="person_netid" id="occ_netid"></label>
             <label>Org <input name="org" id="occ_org"></label>
             <label>Type <input name="emp_type" placeholder="AP, Civil Service, Student"></label>
-            <label class="check" style="align-self:end">
+            <label class="check end">
                 <input type="checkbox" name="primary" value="1"> Primary office</label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="occupant_add">Assign to room</button>
+            <div class="actions span-all">
+                <button name="action" value="occupant_add">Assign to Room</button>
             </div>
         </form>
     </div>
 
     <?php if ($events): ?>
     <div class="panel">
-        <h3>Assignment history</h3>
+        <h3>Assignment History</h3>
         <ul class="stagechain">
             <?php foreach ($events as $e): ?>
             <li><?= h(date('M j, Y g:ia', strtotime((string)$e['CreatedAt']))) ?> &mdash;

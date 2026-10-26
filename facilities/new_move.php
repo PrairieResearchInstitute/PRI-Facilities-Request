@@ -178,12 +178,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Move Request', '<a href="index.php">&larr; request types</a>');
+ui_top('Move Request', '', '', 'index.php', 'request types');
 flash_show();
 
 function building_options(array $buildings, string $selected): void
 {
-    echo '<option value="">--Select Building--</option>';
+    echo '<option value="">Choose a building</option>';
     foreach ($buildings as $b) {
         echo '<option value="' . h((string)$b['BldgNumber']) . '"'
            . ' data-bldg="' . h((string)$b['BldgNumber']) . '"'
@@ -217,16 +217,16 @@ function building_options(array $buildings, string $selected): void
             </select>
         </label>
         <label>From floor
-            <select name="from_floor" data-loc-floor disabled><option value="">--</option></select>
+            <select name="from_floor" data-loc-floor disabled><option value="">Choose one</option></select>
         </label>
         <label>From room
             <select name="from_room" data-loc-room data-initial="<?= h((string)($_POST['from_room'] ?? '')) ?>">
-                <option value="">--Select a building first--</option>
+                <option value="">Choose a building first</option>
             </select>
         </label>
         <input type="hidden" name="from_room_code" data-loc-code
                value="<?= h((string)($_POST['from_room_code'] ?? '')) ?>">
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
 
     <h2>2. Where It Is Going</h2>
@@ -238,16 +238,16 @@ function building_options(array $buildings, string $selected): void
             </select>
         </label>
         <label>To floor
-            <select name="to_floor" data-loc-floor disabled><option value="">--</option></select>
+            <select name="to_floor" data-loc-floor disabled><option value="">Choose one</option></select>
         </label>
         <label>To room
             <select name="to_room" data-loc-room data-initial="<?= h((string)($_POST['to_room'] ?? '')) ?>">
-                <option value="">--Select a building first--</option>
+                <option value="">Choose a building first</option>
             </select>
         </label>
         <input type="hidden" name="to_room_code" data-loc-code
                value="<?= h((string)($_POST['to_room_code'] ?? '')) ?>">
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
     <div class="grid">
         <label>Person responsible after the move
@@ -278,7 +278,7 @@ function building_options(array $buildings, string $selected): void
         </table>
     </div>
     <div class="actions">
-        <button type="button" id="addmanual">Add something not listed</button>
+        <button type="button" id="addmanual">Add Something Not Listed</button>
     </div>
 
     <h2>4. When and Anything Else</h2>
@@ -286,7 +286,7 @@ function building_options(array $buildings, string $selected): void
         <label>Requested completion date
             <input type="date" name="needed_by" required value="<?= h((string)($_POST['needed_by'] ?? '')) ?>">
         </label>
-        <label class="check" style="align-self:end">
+        <label class="check end">
             <input type="checkbox" name="person_moving" value="1"
                 <?= isset($_POST['person_moving']) ? 'checked' : '' ?>> A person is moving to a new location
         </label>
@@ -299,7 +299,7 @@ function building_options(array $buildings, string $selected): void
     </label>
 
     <div class="actions">
-        <button class="primary">Submit move request</button>
+        <button class="primary">Submit Move Request</button>
     </div>
 </form>
 
@@ -328,6 +328,4 @@ function building_options(array $buildings, string $selected): void
     </tr>
 </template>
 
-<script src="assets/location.js"></script>
-<script src="assets/move.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js', 'move.js']); ?>

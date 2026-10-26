@@ -944,7 +944,7 @@ function pptx_build(string $title, array $slides): string
         . 'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
         . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
         . '<dc:title>' . pptx_esc($title) . '</dc:title>'
-        . '<dc:creator>PRI Facilities Request System</dc:creator>'
+        . '<dc:creator>PRIOps</dc:creator>'
         . '<dcterms:created xsi:type="dcterms:W3CDTF">' . date('c') . '</dcterms:created>'
         . '<dcterms:modified xsi:type="dcterms:W3CDTF">' . date('c') . '</dcterms:modified>'
         . '</cp:coreProperties>';

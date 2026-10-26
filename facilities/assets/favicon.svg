@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PRI Facilities">
   <rect width="64" height="64" rx="10" fill="#13294b"/>
-  <path d="M12 34 L32 18 L52 34" fill="none" stroke="#e84a27" stroke-width="6"
+  <path d="M12 34 L32 18 L52 34" fill="none" stroke="#FF5F05" stroke-width="6"
         stroke-linecap="round" stroke-linejoin="round"/>
   <rect x="20" y="34" width="24" height="16" rx="2" fill="#ffffff"/>
   <rect x="29" y="40" width="6" height="10" fill="#13294b"/>

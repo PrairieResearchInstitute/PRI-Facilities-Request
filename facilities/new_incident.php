@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
+ui_top('Report an Incident', 'An injury, a near miss, a spill, an exposure');
 ?>
 
 <?php if ($done): ?>
@@ -88,8 +88,8 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
     <p>This is <strong><?= h($done['ticket']) ?></strong>. The safety office has been told.</p>
     <p>You can look at it again on <a href="incident.php?id=<?= (int)$done['id'] ?>">your report</a>,
        and you will see anything added to it.</p>
-    <p><a class="btn" href="new_incident.php">Report something else</a>
-       <a class="btn secondary" href="index.php">Back to the start</a></p>
+    <p><a class="btn" href="new_incident.php">Report Something Else</a>
+       <a class="btn secondary" href="index.php">Back to the Start</a></p>
 </div>
 <?php else: ?>
 
@@ -133,7 +133,7 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
     <div class="grid" data-loc-group data-loc="inside">
         <label>Building
             <select name="bldg" data-loc-building>
-                <option value="">&mdash;</option>
+                <option value="">Choose one</option>
                 <?php foreach ($buildings as $b): ?>
                 <option value="<?= h((string)$b['BldgNumber']) ?>"
                     <?= (string)($_POST['bldg'] ?? '') === (string)$b['BldgNumber'] ? 'selected' : '' ?>>
@@ -141,14 +141,14 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
                 <?php endforeach; ?>
             </select></label>
         <label>Floor
-            <select name="floor" data-loc-floor disabled><option value="">&mdash;</option></select></label>
+            <select name="floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
         <label>Room
             <select name="room" data-loc-room
                     data-initial="<?= h((string)($_POST['room'] ?? '')) ?>">
-                <option value="">&mdash;Choose a building first&mdash;</option>
+                <option value="">Choose a building first</option>
             </select></label>
         <input type="hidden" data-loc-code>
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
 
     <label>Where exactly, in words
@@ -158,7 +158,7 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
     <div data-when-kind="vehicle">
         <label>Which vehicle
             <select name="fleet_number">
-                <option value="">&mdash;</option>
+                <option value="">Choose one</option>
                 <?php foreach ($vehicles as $v): ?>
                 <option value="<?= h((string)$v['FleetNumber']) ?>"
                     <?= (string)($_POST['fleet_number'] ?? '') === (string)$v['FleetNumber'] ? 'selected' : '' ?>>
@@ -169,7 +169,7 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
 
     <label>Which survey&rsquo;s work was this?
         <select name="survey">
-            <option value="">&mdash;</option>
+            <option value="">Choose one</option>
             <?php foreach ($surveys as $s): ?>
             <option value="<?= h((string)$s['Code']) ?>"
                 <?= (string)($_POST['survey'] ?? '') === (string)$s['Code'] ? 'selected' : '' ?>>
@@ -177,7 +177,7 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
             <?php endforeach; ?>
         </select></label>
 
-    <h2>4. Tell It In Your Own Words</h2>
+    <h2>4. Tell It in Your Own Words</h2>
     <label>What happened
         <textarea name="description" rows="5" required
                   placeholder="What you saw, in the order it happened."><?=
@@ -209,16 +209,17 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
             <td><input name="p_injury[]"></td>
             <td><input name="p_body[]" size="12"></td>
             <td><select name="p_treatment[]">
-                <option value="">&mdash;</option>
+                <option value="">Choose one</option>
                 <?php foreach (picklist('incident_treatment') as $c => $l): ?>
                 <option value="<?= h($c) ?>"><?= h($l) ?></option>
                 <?php endforeach; ?>
                 </select></td>
-            <td><button type="button" class="link" data-drop>Remove</button></td>
+            <td><button type="button" class="rowdel" title="Remove this person"
+                    aria-label="Remove this person">&times;</button></td>
         </tr>
     </table>
     </div>
-    <p><button type="button" class="btn secondary" id="addperson">Add another person</button></p>
+    <p><button type="button" class="btn secondary" id="addperson">Add Another Person</button></p>
 
     <h2>6. Photographs</h2>
     <label>Anything worth showing
@@ -275,16 +276,15 @@ ui_top('Report An Incident', 'An injury, a near miss, a spill, an exposure');
         if (netid && e.detail && e.detail.netid) { netid.value = e.detail.netid; }
     });
     table.addEventListener('click', function (e) {
-        if (!e.target.hasAttribute('data-drop')) { return; }
+        var drop = e.target.closest('.rowdel');
+        if (!drop) { return; }
         var rows = table.querySelectorAll('[data-row]');
-        if (rows.length > 1) { e.target.closest('tr').remove(); }
+        if (rows.length > 1) { drop.closest('tr').remove(); }
         else { rows[0].querySelectorAll('input, select').forEach(function (f) {
             if (f.type !== 'checkbox') { f.value = ''; } }); }
     });
 })();
 </script>
-<script src="assets/location.js"></script>
-<script src="assets/typeahead.js"></script>
 
 <?php endif; ?>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js']); ?>

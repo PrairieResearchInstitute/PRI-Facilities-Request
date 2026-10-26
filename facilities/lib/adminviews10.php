@@ -51,7 +51,7 @@ function av_incidents(): void
 
     <?php if ($repeat): ?>
     <div class="panel warn">
-        <h3>Rooms With More Than One Report In Two Years</h3>
+        <h3>Rooms with More Than One Report in Two Years</h3>
         <p>Not necessarily a problem, but the place to look first.</p>
         <ul>
         <?php foreach ($repeat as $r): ?>
@@ -86,7 +86,7 @@ function av_incidents(): void
                 <td><a href="incident.php?id=<?= (int)$r['IncidentID'] ?>"><?=
                     h((string)$r['TicketNumber']) ?></a></td>
                 <td><?= h(picklist_label('incident_kind', (string)$r['IncidentKind'])) ?></td>
-                <td><?= h(date('j M Y', strtotime((string)$r['OccurredAt']))) ?></td>
+                <td><?= h(ui_date(strtotime((string)$r['OccurredAt']))) ?></td>
                 <td><?= h($where) ?></td>
                 <td><?= h((string)$r['SurveyCode']) ?></td>
                 <td class="center"><?= (int)$r['Hurt'] ?: '' ?></td>
@@ -164,10 +164,10 @@ function av_plans(): void
                 <td><?= h((string)($r['UnitName'] ?: $r['SurveyCode'])) ?></td>
                 <td class="center"><?= (int)$r['Rooms'] ?: '<span class="muted">none</span>' ?></td>
                 <td><?= $r['LastReviewedOn']
-                        ? h(date('j M Y', strtotime((string)$r['LastReviewedOn'])))
+                        ? h(ui_date(strtotime((string)$r['LastReviewedOn'])))
                         : '<span class="muted">never</span>' ?></td>
                 <td class="<?= $cls ?>"><?= $r['ReviewDueOn']
-                        ? h(date('j M Y', strtotime((string)$r['ReviewDueOn'])))
+                        ? h(ui_date(strtotime((string)$r['ReviewDueOn'])))
                           . ($days !== null && $days < 0
                              ? ' <strong>' . abs($days) . ' late</strong>' : '')
                         : '&mdash;' ?></td>
@@ -258,7 +258,7 @@ function av_estate(): void
             <?php if ($r['Status'] !== 'expired') { continue; } ?>
             <li><strong><?= h((string)$r['Name']) ?></strong>
                 &mdash; <?= h((string)$r['Reference']) ?>,
-                ended <?= h(date('j F Y', strtotime((string)$r['EndsOn']))) ?>
+                ended <?= h(ui_date(strtotime((string)$r['EndsOn']))) ?>
                 (<?= abs((int)$r['DueDays']) ?> days ago)</li>
         <?php endforeach; ?>
         </ul>
@@ -293,7 +293,7 @@ function av_estate(): void
                           . round((float)$r['IcrShare'] * 100) . '%'
                         : '<span class="muted">not split</span>' ?></td>
                 <td class="<?= $cls ?>"><?= $r['EndsOn']
-                        ? h(date('j M Y', strtotime((string)$r['EndsOn'])))
+                        ? h(ui_date(strtotime((string)$r['EndsOn'])))
                         : '<span class="muted">not recorded</span>' ?></td>
             </tr>
             <?php endforeach; ?>

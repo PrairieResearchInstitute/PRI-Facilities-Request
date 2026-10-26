@@ -275,7 +275,7 @@ if (!$seeAll) {
             <th>Type / severity</th><th>Confirmations</th><th>Status</th><th>Age</th></tr>
         <?php foreach ($rows as $r):
             $age = (int)floor((time() - strtotime((string)$r['CreatedAt'])) / 86400); ?>
-        <tr class="rowlink" onclick="location='detail.php?type=work&amp;id=<?= (int)$r['WorkRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='detail.php?type=work&amp;id=<?= (int)$r['WorkRequestID'] ?>'">
             <td><span class="band band-<?= h($r['_band']) ?>"><?= h($r['_band']) ?></span> <?= number_format($r['_priority'], 1) ?></td>
             <td><a href="detail.php?type=work&amp;id=<?= (int)$r['WorkRequestID'] ?>"><?= h($r['TicketNumber']) ?></a></td>
             <td><?= h($r['Title']) ?></td>
@@ -294,7 +294,7 @@ if (!$seeAll) {
         <?php foreach ($rows as $r):
             $overdue = strtotime((string)$r['NeededByDate']) < time()
                 && !in_array($r['Status'], ['complete', 'closed', 'declined'], true); ?>
-        <tr class="rowlink" onclick="location='detail.php?type=move&amp;id=<?= (int)$r['MoveRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='detail.php?type=move&amp;id=<?= (int)$r['MoveRequestID'] ?>'">
             <td><a href="detail.php?type=move&amp;id=<?= (int)$r['MoveRequestID'] ?>"><?= h($r['TicketNumber']) ?></a></td>
             <td><?= h($r['RequestedByNetID']) ?></td>
             <td><?= h((string)$r['SurveyCode']) ?></td>
@@ -309,7 +309,7 @@ if (!$seeAll) {
         <tr><th>Ticket</th><th>Requested by</th><th>Survey</th><th>Asking for</th>
             <th>Type of space</th><th>Account</th><th>Needed by</th><th>Status</th></tr>
         <?php foreach ($rows as $r): ?>
-        <tr class="rowlink" onclick="location='request.php?type=space&amp;id=<?= (int)$r['SpaceRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='request.php?type=space&amp;id=<?= (int)$r['SpaceRequestID'] ?>'">
             <td><a href="request.php?type=space&amp;id=<?= (int)$r['SpaceRequestID'] ?>"><?= h((string)$r['TicketNumber']) ?></a></td>
             <td><?= h((string)($r['SubmittedByNames'] ?: $r['RequestedByNetID'])) ?></td>
             <td><?= h((string)$r['SurveyCode']) ?></td>
@@ -330,7 +330,7 @@ if (!$seeAll) {
         <?php foreach ($rows as $r):
             $need = (int)$r['SeatsNeeded'];
             $in = (int)$r['SeatsIn']; ?>
-        <tr class="rowlink" onclick="location='purchase_view.php?id=<?= (int)$r['PurchaseRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='purchase_view.php?id=<?= (int)$r['PurchaseRequestID'] ?>'">
             <td><a href="purchase_view.php?id=<?= (int)$r['PurchaseRequestID'] ?>"><?= h((string)$r['TicketNumber']) ?></a></td>
             <td><?= h((string)$r['StaffRequesting']) ?></td>
             <td><?= h((string)$r['SurveyCode']) ?></td>
@@ -347,7 +347,7 @@ if (!$seeAll) {
         <tr><th>Ticket</th><th>For</th><th>Survey</th><th>Building</th><th>Room</th>
             <th>Type</th><th>Qty</th><th>Needed by</th><th>Status</th></tr>
         <?php foreach ($rows as $r): ?>
-        <tr class="rowlink" onclick="location='request.php?type=key&amp;id=<?= (int)$r['KeyRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='request.php?type=key&amp;id=<?= (int)$r['KeyRequestID'] ?>'">
             <td><a href="request.php?type=key&amp;id=<?= (int)$r['KeyRequestID'] ?>"><?= h((string)$r['TicketNumber']) ?></a></td>
             <td><?= h((string)($r['HolderName'] ?: $r['RequestedByNetID'])) ?></td>
             <td><?= h((string)$r['SurveyCode']) ?></td>
@@ -366,7 +366,7 @@ if (!$seeAll) {
         <?php foreach ($rows as $r):
             $overdue = strtotime((string)$r['NeededByDate']) < time()
                 && !in_array($r['Status'], ['complete', 'closed', 'denied'], true); ?>
-        <tr class="rowlink" onclick="location='detail.php?type=shop&amp;id=<?= (int)$r['ShopRequestID'] ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='detail.php?type=shop&amp;id=<?= (int)$r['ShopRequestID'] ?>'">
             <td><a href="detail.php?type=shop&amp;id=<?= (int)$r['ShopRequestID'] ?>"><?= h($r['TicketNumber']) ?></a></td>
             <td><?= h($r['RequestedByNetID']) ?></td>
             <td><?= h($r['SurveyCode']) ?></td>

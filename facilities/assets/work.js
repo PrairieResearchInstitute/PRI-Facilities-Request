@@ -44,7 +44,9 @@
                 render(data.candidates || []);
             })
             .catch(function () {
-                list.innerHTML = '<p class="muted">Could not load open requests; you may continue.</p>';
+                // A failure reads as a failure, .bad; .muted is for an empty
+                // result, which is the line below (PFR-34).
+                list.innerHTML = '<p class="bad">Could not load open requests; you may continue.</p>';
                 box.hidden = false;
                 btn.disabled = false;
             });

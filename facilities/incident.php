@@ -38,7 +38,7 @@ if (!$inc) {
 $isMine = strcasecmp((string)$inc['ReportedByNetID'], (string)$user['NetID']) === 0;
 if (!$isMine && !may_read_incidents($user)) {
     http_response_code(403);
-    ui_top('Not Yours To Read', '');
+    ui_top('Not Yours', '');
     echo '<div class="panel error"><p>This report names people and describes what happened '
        . 'to them. You may read your own reports; this one is not yours.</p></div>';
     ui_bottom();
@@ -77,7 +77,7 @@ if ($where === '') {
 }
 
 ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind'])),
-       h((string)$inc['TicketNumber']) . ' &middot; <a href="incidents.php">all reports</a>');
+       (string)$inc['TicketNumber'], '', 'incidents.php', 'all reports');
 ?>
 
 <?php if ($notice): ?>
@@ -87,7 +87,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
 
 <div class="panel">
     <div class="grid">
-        <div><strong>When</strong><br><?= h(date('j F Y, g:ia', strtotime((string)$inc['OccurredAt']))) ?></div>
+        <div><strong>When</strong><br><?= h(ui_datetime(strtotime((string)$inc['OccurredAt']))) ?></div>
         <div><strong>Where</strong><br><?= h($where ?: 'not recorded') ?>
              <?= $inc['IsOffCampus'] ? '<span class="muted"> (not a PRI building)</span>' : '' ?></div>
         <div><strong>Reported by</strong><br><?= h((string)($inc['ReportedByName']
@@ -108,8 +108,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
     <p class="warn"><strong>Reportable.</strong>
        <?= $inc['ReportedTo']
             ? 'Told ' . h((string)$inc['ReportedTo'])
-              . ($inc['ReportedOutwardOn'] ? ' on ' . h(date('j F Y',
-                    strtotime((string)$inc['ReportedOutwardOn']))) : '')
+              . ($inc['ReportedOutwardOn'] ? ' on ' . h(ui_date(strtotime((string)$inc['ReportedOutwardOn']))) : '')
             : 'Not yet reported onward.' ?></p>
     <?php endif; ?>
 </div>
@@ -164,8 +163,8 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
                 <?= $a['WorkTicketNumber'] ? '<span class="muted"> &middot; '
                     . h((string)$a['WorkTicketNumber']) . '</span>' : '' ?></td>
             <td><?= h((string)$a['OwnerName']) ?></td>
-            <td><?= $a['DueOn'] ? h(date('j M Y', strtotime((string)$a['DueOn']))) : '' ?></td>
-            <td><?= $a['DoneOn'] ? h(date('j M Y', strtotime((string)$a['DoneOn']))) : '' ?>
+            <td><?= $a['DueOn'] ? h(ui_date(strtotime((string)$a['DueOn']))) : '' ?></td>
+            <td><?= $a['DoneOn'] ? h(ui_date(strtotime((string)$a['DoneOn']))) : '' ?>
                 <?= $a['DoneNote'] ? '<br><span class="muted">' . h((string)$a['DoneNote'])
                                      . '</span>' : '' ?></td>
             <td>
@@ -189,7 +188,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
     <form method="post" class="grid">
         <?= csrf_field() ?>
         <input type="hidden" name="do" value="action">
-        <label style="grid-column:1/-1">What is being done
+        <label class="span-all">What is being done
             <input name="action" required
                    placeholder="Replace the guard, retrain the crew, fit a second eyewash"></label>
         <label>Whose job it is
@@ -199,7 +198,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
         <label>By when <input type="date" name="due"></label>
         <label>Work order, if one was raised
             <input name="work_ticket" placeholder="WO-FY27-00123"></label>
-        <p style="grid-column:1/-1"><button class="btn">Add This Action</button></p>
+        <p class="span-all"><button class="btn">Add This Action</button></p>
     </form>
     <?php endif; ?>
 </div>
@@ -212,7 +211,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
         <input type="hidden" name="do" value="grade">
         <label>How serious
             <select name="severity">
-                <option value="">&mdash;</option>
+                <option value="">Choose one</option>
                 <?php foreach (picklist('incident_severity') as $c => $l): ?>
                 <option value="<?= h($c) ?>"
                     <?= (string)$inc['Severity'] === $c ? 'selected' : '' ?>><?= h($l) ?></option>
@@ -226,7 +225,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
         <label>On
             <input type="date" name="reported_on"
                    value="<?= h((string)$inc['ReportedOutwardOn']) ?>"></label>
-        <p style="grid-column:1/-1"><button class="btn secondary">Record This</button></p>
+        <p class="span-all"><button class="btn secondary">Record This</button></p>
     </form>
 </div>
 
@@ -247,7 +246,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
     <h2>Closed</h2>
     <p><?= nl2br(h((string)$inc['Findings'])) ?></p>
     <p class="muted">Closed by <?= h((string)$inc['ClosedByNetID']) ?>
-       on <?= h(date('j F Y', strtotime((string)$inc['ClosedAt']))) ?>.</p>
+       on <?= h(ui_date(strtotime((string)$inc['ClosedAt']))) ?>.</p>
 </div>
 <?php endif; ?>
 <?php endif; ?>
@@ -269,7 +268,7 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
     <ul class="timeline">
     <?php foreach ($inc['events'] as $e): ?>
         <li><strong><?= h(nice_code((string)$e['EventCode'])) ?></strong>
-            &middot; <?= h(date('j M Y, g:ia', strtotime((string)$e['CreatedAt']))) ?>
+            &middot; <?= h(ui_datetime(strtotime((string)$e['CreatedAt']))) ?>
             <?= $e['ByName'] ? ' &middot; ' . h((string)$e['ByName']) : '' ?>
             <?= $e['Detail'] ? '<br><span class="muted">' . h((string)$e['Detail'])
                                . '</span>' : '' ?></li>
@@ -277,5 +276,4 @@ ui_top(title_case(picklist_label('incident_kind', (string)$inc['IncidentKind']))
     </ul>
 </div>
 
-<script src="assets/typeahead.js"></script>
 <?php ui_bottom(); ?>

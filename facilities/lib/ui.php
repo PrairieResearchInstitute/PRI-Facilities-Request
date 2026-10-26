@@ -14,6 +14,8 @@ demo_fill_apply();
  * Shared page chrome. Every page carries the nav (Home, Open Requests,
  * Admin) and either the NetID the university sign-in passed (AUTH_MODE
  * proxy) or, on this computer outside production, the acting-user switcher.
+ *
+ * Developed by M. J. Dreslik, with Claude Opus 5 (drez-ui-elements rule 27).
  */
 
 function h(mixed $s): string
@@ -53,8 +55,24 @@ function ui_brand_mark(int $h = 30): string
         . '<span class="brandword"><b>PRI</b><i>Ops</i></span></span>';
 }
 
-function ui_top(string $title, string $sub = '', string $bodyClass = ''): void
-{
+/**
+ * The page chrome. $sub is plain text and is escaped here.
+ *
+ * $backHref and $backLabel are the back link, because the subtitle used to
+ * carry one as markup. Commit 1e2ec49 made the subtitle escape its argument,
+ * which was right for safety and turned seventeen pages' back links into
+ * visible tags (PFR-01). A link is now a parameter rather than a string the
+ * caller builds, so no page has to choose between an escaped subtitle and a
+ * working link. The link reads the same on every page: an arrow, then where
+ * it goes.
+ */
+function ui_top(
+    string $title,
+    string $sub = '',
+    string $bodyClass = '',
+    string $backHref = '',
+    string $backLabel = ''
+): void {
     $u = current_user();
     // The system's name is a setting, because it earned a rename once
     // already - Facilities Request System became PRIOps when safety,
@@ -65,6 +83,7 @@ function ui_top(string $title, string $sub = '', string $bodyClass = ''): void
        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
        . '<title>' . h($pageTitle) . '</title>'
        . '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">'
+       . '<link rel="icon" href="assets/favicon.ico" sizes="any">'
        . '<link rel="stylesheet" href="assets/app.css"></head>'
        . '<body' . (($c = trim($bodyClass . (demo_fill_phone() ? ' phone demo' : ''))) !== ''
            ? ' class="' . h($c) . '"' : '') . '>';
@@ -77,14 +96,28 @@ function ui_top(string $title, string $sub = '', string $bodyClass = ''): void
        . ($sameAsBrand
           ? '<h1 class="brandonly">' . ui_brand_mark(44) . '</h1>'
           : ui_brand_mark(44) . '<h1>' . h($title) . '</h1>');
-    if ($sub !== '') {
-        echo '<p class="sub">' . h($sub) . '</p>';
+    if ($backHref !== '' || $sub !== '') {
+        echo '<p class="sub">';
+        // No class of its own: header.site .sub already styles the line and
+        // the link inside it, and a class with no rule behind it is the very
+        // fault this pass is clearing (PFR-02 to PFR-07).
+        if ($backHref !== '') {
+            echo '<a href="' . h($backHref) . '">&larr; '
+               . h($backLabel !== '' ? $backLabel : 'back') . '</a>';
+            if ($sub !== '') {
+                echo ' &middot; ';
+            }
+        }
+        if ($sub !== '') {
+            echo h($sub);
+        }
+        echo '</p>';
     }
     // The back end is only offered to the people who may use it, so
     // staff never meet a link that answers with a refusal.
     echo '</div><nav class="mainnav">'
        . '<a href="index.php">Home</a> '
-       . '<a href="digest.php">My work</a> '
+       . '<a href="digest.php">My Work</a> '
        // Open requests is reached from its own card on the front page, so
        // it is not repeated here.
        . (can_admin() ? '<a href="admin.php">Admin</a>' : '')
@@ -115,18 +148,105 @@ function ui_top(string $title, string $sub = '', string $bodyClass = ''): void
     echo '</header><main>';
 }
 
-function ui_bottom(): void
+/**
+ * Ask before an irreversible action, on the server (Q-27, PFR-39).
+ *
+ * `data-confirm` and PriDialog ask in the browser, which is where the
+ * question belongs when JavaScript runs. A handler that writes or deletes
+ * cannot rely on that: a form posted with scripting off, or by anything
+ * other than the page, arrives with no question asked. This renders the
+ * question as a page of its own and posts the same fields back with
+ * confirmed=1, so the handler reaches its work only on the second pass.
+ *
+ * $fields is the name and value pairs to carry forward, usually the parts
+ * of $_POST the handler needs. Values are escaped here; pass them raw.
+ */
+function ui_confirm_page(
+    string $title,
+    string $question,
+    string $okLabel,
+    array $fields,
+    string $cancelHref,
+    bool $danger = false
+): void {
+    ui_top($title);
+    echo '<div class="panel">'
+       . '<p>' . h($question) . '</p>'
+       . '<form method="post">' . csrf_field()
+       . '<input type="hidden" name="confirmed" value="1">';
+    foreach ($fields as $name => $value) {
+        if (is_array($value)) {
+            foreach ($value as $v) {
+                echo '<input type="hidden" name="' . h((string)$name) . '[]" value="' . h((string)$v) . '">';
+            }
+            continue;
+        }
+        echo '<input type="hidden" name="' . h((string)$name) . '" value="' . h((string)$value) . '">';
+    }
+    echo '<div class="actions">'
+       . '<a class="btn secondary" href="' . h($cancelHref) . '">Cancel</a>'
+       . '<button class="' . ($danger ? 'danger' : 'primary') . '">' . h($okLabel) . '</button>'
+       . '</div></form></div>';
+    ui_bottom();
+    exit;
+}
+
+/**
+ * The footer and the scripts. $scripts names a page's own files in
+ * `assets\`, for example `ui_bottom(['location.js', 'work.js'])`.
+ *
+ * A page used to print its scripts itself, which put them inside `<main>`
+ * where no script belongs (PFR-22), and three pages loaded typeahead.js a
+ * second time on top of the copy this function already sends. Naming them
+ * here puts every script in one place, after the content, in the order the
+ * page asked for.
+ */
+/**
+ * Ask for a script from inside an include, which cannot reach the page's
+ * own `ui_bottom()` call. `lib/mapview.php` asks for `map.js` this way, so
+ * the floor plan carries its own requirement and the admin page does not
+ * have to know which section it is showing.
+ */
+function ui_script(string $file): void
 {
+    $GLOBALS['ui_scripts'][] = $file;
+}
+
+function ui_bottom(array $scripts = []): void
+{
+    $scripts = array_merge($scripts, (array)($GLOBALS['ui_scripts'] ?? []));
+    $scripts = array_values(array_unique($scripts));
     // The lookup script goes on every page from here rather than being
     // remembered form by form. It does nothing unless the page contains a
     // data-typeahead box, and forgetting it on one form was how the
     // admin screens ended up with a weaker mechanism of their own.
     $brand = (string)setting('app_name', 'PRIOps');
+    $own = '';
+    foreach ($scripts as $file) {
+        $name = (string)$file;
+        $defer = '';
+        if (str_ends_with($name, ' defer')) {
+            $name = substr($name, 0, -6);
+            $defer = ' defer';
+        }
+        // Only a plain file name in assets\, so a page cannot reach out of it.
+        if (preg_match('/^[A-Za-z0-9._-]+\.js$/', $name) !== 1) {
+            continue;
+        }
+        $own .= '<script src="assets/' . h($name) . '"' . $defer . '></script>';
+    }
     echo '</main><footer class="foot">'
        . (can_admin() ? '<a href="admin.php">Administration</a> &middot; ' : '')
-       . '<a href="stages.php">How requests move</a> &middot; '
-       . h($brand) . '</footer>'
+       . '<a href="stages.php">How Requests Move</a> &middot; '
+       . h($brand) . ' &middot; '
+       // The authorship credit (drez-ui-elements rule 27); tools/check.js looks for it.
+       . '<span class="credit">Developed by M. J. Dreslik, with Claude Opus 5</span></footer>'
+       . $own
        . '<script src="assets/typeahead.js"></script>'
+       // Same reasoning as the lookup script: the dialog helper goes on
+       // every page from here, so a form that asks before it removes
+       // something never has to remember to load it (Q-27).
+       . '<script src="assets/dialog.js"></script>'
        // Emits nothing unless ?open= is present (capture aid).
        . (function_exists('demo_open_selects') ? demo_open_selects() : '')
        . (function_exists('demo_capture_frame') ? demo_capture_frame() : '')
@@ -151,6 +271,48 @@ function flash_show(): void
 }
 
 /**
+ * Dates a person reads (Q-016, owner 17 Oct 2026).
+ *
+ * One order everywhere: "Oct 17, 2026" on screens, "October 17, 2026" on a
+ * printed safety report. The safety family used to run day first, "17 Oct
+ * 2026" and "17 October 2026", against month first on every other page
+ * (PFR-17). $when takes a timestamp or anything strtotime() reads; an
+ * empty value gives an empty string rather than 1 Jan 1970.
+ */
+function ui_when($when): ?int
+{
+    if ($when === null || $when === '' || $when === false) {
+        return null;
+    }
+    if (is_int($when)) {
+        return $when;
+    }
+    $t = strtotime((string)$when);
+    return $t === false ? null : $t;
+}
+
+/** Oct 17, 2026 */
+function ui_date($when): string
+{
+    $t = ui_when($when);
+    return $t === null ? '' : date('M j, Y', $t);
+}
+
+/** Oct 17, 2026, 3:04pm */
+function ui_datetime($when): string
+{
+    $t = ui_when($when);
+    return $t === null ? '' : date('M j, Y, g:ia', $t);
+}
+
+/** October 17, 2026, for a printed report. */
+function ui_date_long($when): string
+{
+    $t = ui_when($when);
+    return $t === null ? '' : date('F j, Y', $t);
+}
+
+/**
  * Title Case, for anything a person reads as a name rather than a
  * sentence: a status, a stage, a section.
  *
@@ -166,6 +328,11 @@ function title_case(string $s): string
     $out = '';
     $index = 0;
     $last = count($words) - 1;
+    // A step number is not a word for this purpose. Without this, "1. The
+    // Item" came back as "1. the Item", because "The" was no longer first.
+    if (isset($words[0]) && preg_match('/^\d+[.)]?$/', $words[0])) {
+        $index = -1;
+    }
     foreach ($words as $i => $w) {
         if (trim($w) === '') {
             $out .= $w;

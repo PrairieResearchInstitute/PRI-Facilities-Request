@@ -162,7 +162,7 @@ function approval_notify(string $type, int $id, string $ticket, string $decision
     if (!$to) {
         return;
     }
-    $subject = ucfirst($decision) . ': ' . $ticket;
+    $subject = 'PRIOps: ' . $ticket . ' ' . strtolower($decision);
     $body = $ticket . ' was ' . $decision . ' at the ' . $stage . " stage.\n\n"
           . ($comment !== '' ? "Comment:\n" . $comment . "\n\n" : '')
           . notify_base_url() . 'detail.php?type=' . $type . '&id=' . $id;

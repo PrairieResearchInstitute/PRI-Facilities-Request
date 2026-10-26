@@ -14,6 +14,7 @@ require_once __DIR__ . '/lib/access.php';
 require_once __DIR__ . '/lib/scoring.php';
 require_once __DIR__ . '/lib/tickets.php';
 require_once __DIR__ . '/lib/approvals.php';
+require_once __DIR__ . '/lib/requests2.php';   // status_labels() for the stage panel
 require_once __DIR__ . '/lib/attachments.php';
 
 if (!app_installed()) {
@@ -39,7 +40,7 @@ $stmt->execute([$id]);
 $req = $stmt->fetch();
 if (!$req) {
     http_response_code(404);
-    ui_top('Not found');
+    ui_top('Not Found');
     echo '<div class="panel err"><p>No such request.</p><p><a href="board.php">Back to the board</a></p></div>';
     ui_bottom();
     exit;
@@ -58,7 +59,7 @@ $filedBy = (string)($req['RequestedByNetID'] ?? $req['CreatedByNetID'] ?? '');
 if (!may_see_all_requests($user)
     && strcasecmp($filedBy, (string)$user['NetID']) !== 0) {
     http_response_code(403);
-    ui_top('Not yours');
+    ui_top('Not Yours');
     echo '<div class="panel err"><p>That request was filed by somebody else. You can see the '
        . 'ones you filed on <a href="board.php">Open Requests</a>.</p></div>';
     ui_bottom();
@@ -187,7 +188,7 @@ if ($type === 'work') {
 }
 
 $typeNames = ['work' => 'Work Request', 'move' => 'Move Request', 'shop' => 'Shop Services Request'];
-ui_top($req['TicketNumber'] . ' — ' . $typeNames[$type], '<a href="board.php?tab=' . $type . '">&larr; board</a>');
+ui_top($req['TicketNumber'] . ' — ' . $typeNames[$type], '', '', 'board.php?tab=' . $type, 'board');
 flash_show();
 
 $alreadyConfirmed = false;
@@ -240,6 +241,21 @@ foreach ($corro as $c) {
     </table>
 </div>
 
+<?php $flow = status_labels($type); if ($flow): ?>
+<div class="panel">
+    <h2>Where It Stands</h2>
+    <ol class="flowchart">
+        <?php foreach ($flow as $code => $st):
+            $done = (int)$st['StageOrder'] < (int)($flow[$req['Status']]['StageOrder'] ?? 0);
+            $now = $code === $req['Status'];
+            $cls = $now ? 'now' : ($done ? 'done' : ''); ?>
+        <li class="<?= $cls ?>"><strong><?= h((string)$st['Label']) ?></strong>
+            <span class="muted"><?= h((string)$st['OwnerHint']) ?></span></li>
+        <?php endforeach; ?>
+    </ol>
+</div>
+<?php endif; ?>
+
 <?php if ($type === 'work'): ?>
 <div class="panel">
     <h2>Confirmations (<?= count($corro) ?>)</h2>
@@ -257,7 +273,7 @@ foreach ($corro as $c) {
               && $req['CreatedByNetID'] !== $user['NetID'] && !$alreadyConfirmed): ?>
     <form method="post">
         <?= csrf_field() ?>
-        <button name="action" value="confirm" class="primary">I am seeing this too</button>
+        <button name="action" value="confirm" class="primary">I Am Seeing This Too</button>
     </form>
     <?php endif; ?>
 </div>
@@ -293,7 +309,7 @@ foreach ($corro as $c) {
     <form method="post" action="admin.php?section=equipment">
         <?= csrf_field() ?>
         <input type="hidden" name="move_id" value="<?= (int)$id ?>">
-        <button name="action" value="equip_apply_move" class="primary">Apply to equipment records</button>
+        <button name="action" value="equip_apply_move" class="primary">Apply to Equipment Records</button>
     </form>
 </div>
 <?php endif; ?>
@@ -307,7 +323,7 @@ foreach ($corro as $c) {
         <label>Amount $ <input name="amount" size="12"
             value="<?= h(number_format((float)$req['EstimateAmount'], 2, '.', '')) ?>"></label>
         <label>Why it changed <input name="cost_note" size="28"></label>
-        <button name="action" value="cost">Update cost</button>
+        <button name="action" value="cost">Update Cost</button>
     </form>
     <p class="muted">Corrections are recorded in the status history, so the figure behind every
     room and building total can be traced.</p>
@@ -449,7 +465,7 @@ foreach ($corro as $c) {
         <?php if (role_at_least('coordinator')): ?>
         <label class="check"><input type="checkbox" name="internal" value="1"> Internal note (staff cannot see it)</label>
         <?php endif; ?>
-        <div class="actions"><button name="action" value="note">Add note</button></div>
+        <div class="actions"><button name="action" value="note">Add Note</button></div>
     </form>
 </div>
 

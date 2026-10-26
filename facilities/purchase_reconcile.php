@@ -28,7 +28,7 @@ $id = (int)($_GET['id'] ?? 0);
 $req = purchase_get($id);
 if (!$req) {
     http_response_code(404);
-    ui_top('Reconciliation');
+    ui_top('Reconcile');
     echo '<div class="panel"><p>No such purchase request.</p></div>';
     ui_bottom();
     exit;
@@ -43,8 +43,8 @@ foreach ($rec['groups'] as $g) {
     $whole .= $g['code'] . '  $' . number_format($g['total'], 2) . "\n" . $g['text'] . "\n\n";
 }
 
-ui_top('Reconcile ' . h((string)$req['TicketNumber']),
-       '<a href="purchase_view.php?id=' . $id . '">&larr; the purchase</a>');
+ui_top('Reconcile ' . (string)$req['TicketNumber'],
+       '', '', 'purchase_view.php?id=' . $id, 'the purchase');
 ?>
 <div class="panel">
     <h2>Paste This into Emburse</h2>
@@ -62,7 +62,7 @@ ui_top('Reconcile ' . h((string)$req['TicketNumber']),
 
 <?php if ($rec['uncoded']): ?>
 <div class="panel err">
-    <h3>Lines with no account code</h3>
+    <h3>Lines with No Account Code</h3>
     <p>These cannot be reconciled, because Emburse is broken down by code and these have none.
     Add the code to the purchase and they will appear here.</p>
     <ul>
@@ -88,7 +88,7 @@ ui_top('Reconcile ' . h((string)$req['TicketNumber']),
     <textarea readonly rows="<?= max(3, count($g['lines'])) ?>" id="rec<?= $n ?>"
               onclick="this.select()"><?= h($g['text']) ?></textarea>
     <div class="actions">
-        <button type="button" class="primary" data-copy="rec<?= $n ?>">Copy this block</button>
+        <button type="button" class="primary" data-copy="rec<?= $n ?>">Copy This Block</button>
         <button type="button" data-copy="rec<?= $n ?>" data-with-total="1">Copy with the total</button>
         <span class="copied" hidden>Copied.</span>
     </div>
@@ -101,7 +101,7 @@ ui_top('Reconcile ' . h((string)$req['TicketNumber']),
     <textarea readonly rows="<?= max(4, substr_count($whole, "\n")) ?>" id="recall"
               onclick="this.select()"><?= h(trim($whole)) ?></textarea>
     <div class="actions">
-        <button type="button" data-copy="recall">Copy all of it</button>
+        <button type="button" data-copy="recall">Copy All of It</button>
         <span class="copied" hidden>Copied.</span>
     </div>
 </div>

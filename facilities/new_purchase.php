@@ -185,7 +185,7 @@ function was(string $name, string $fallback = ''): string
     return (string)($_POST[$name] ?? $fallback);
 }
 
-ui_top('Purchase Request', '<a href="index.php">&larr; request types</a>', 'sheet');
+ui_top('Purchase Request', '', 'sheet', 'index.php', 'request types');
 flash_show();
 ?>
 
@@ -224,7 +224,7 @@ flash_show();
             <div class="fields" data-loc-group style="margin-top:0.4rem">
                 <label>Building
                     <select name="bldg" data-loc-building>
-                        <option value="">--Building--</option>
+                        <option value="">Choose a building</option>
                         <?php foreach ($buildings as $b): ?>
                         <option value="<?= h((string)$b['BldgNumber']) ?>"
                             <?= (string)$b['BldgNumber'] === was('bldg') ? 'selected' : '' ?>>
@@ -232,10 +232,10 @@ flash_show();
                         <?php endforeach; ?>
                     </select></label>
                 <label>Floor
-                    <select name="floor" data-loc-floor disabled><option value="">--</option></select></label>
+                    <select name="floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
                 <label>Room
                     <select name="room" data-loc-room data-initial="<?= h(was('room')) ?>">
-                        <option value="">--</option>
+                        <option value="">Choose one</option>
                     </select></label>
                 <input type="hidden" name="room_code" data-loc-code>
                 <p class="muted wide" data-loc-note hidden></p>
@@ -296,7 +296,7 @@ flash_show();
             </table>
         </div>
         <div class="sheettotal">
-            <button type="button" id="additem">Add a line</button>
+            <button type="button" id="additem">Add a Line</button>
             <span class="big">Items: $<span id="grandtotal">0.00</span></span>
             <details class="hint">
                 <summary>About the account code and the equipment tick</summary>
@@ -320,7 +320,7 @@ flash_show();
             <div class="sheettotal" style="margin:0 0 0.4rem">
                 <span style="font-size:0.78rem">Divide the cost by</span>
                 <?php foreach (PURCHASE_SPLITS as $k => $label): ?>
-                <label class="check" style="margin:0"><input type="radio" name="split"
+                <label class="check flat"><input type="radio" name="split"
                     value="<?= h($k) ?>" <?= was('split', 'dollar') === $k ? 'checked' : '' ?>>
                     <?= h(match ($k) { 'dollar' => 'dollars', 'percent' => 'percent',
                                        default => 'item number' }) ?></label>
@@ -347,7 +347,7 @@ flash_show();
                 </table>
             </div>
             <div class="sheettotal">
-                <button type="button" id="addfund">Add an account</button>
+                <button type="button" id="addfund">Add an Account</button>
                 <span class="big">Funding: <span id="fundtotal">0.00</span></span>
                 <span id="fundcheck" class="muted"></span>
             </div>
@@ -382,7 +382,7 @@ flash_show();
 
     <?php /* The signature line of the document, kept in view. */ ?>
     <div class="sheetsubmit">
-        <button class="primary">Submit purchase request</button>
+        <button class="primary">Submit Purchase Request</button>
         <span class="running">Items <strong>$<span id="grandtotal2">0.00</span></strong>
             &middot; funding <strong><span id="fundtotal2">0.00</span></strong>
             <span id="fundcheck2"></span></span>
@@ -391,6 +391,4 @@ flash_show();
     </div>
 </form>
 
-<script src="assets/location.js"></script>
-<script src="assets/purchase.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js', 'purchase.js']); ?>

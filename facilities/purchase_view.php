@@ -48,7 +48,7 @@ if (!$mineToSee) {
 }
 if (!$mineToSee) {
     http_response_code(403);
-    ui_top('Not yours');
+    ui_top('Not Yours');
     echo '<div class="panel err"><p>That purchase request belongs to somebody else. The ones '
        . 'you filed, and the ones waiting on you, are on '
        . '<a href="board.php?tab=purchase">Open Requests</a>.</p></div>';
@@ -120,8 +120,8 @@ $events = purchase_timeline($id);
 $files = attach_list('work', $id, 'purchase');
 $statusLabel = picklist_label('purchase_status', (string)$req['Status']);
 
-ui_top('Purchase Request ' . h((string)$req['TicketNumber']),
-       '<a href="index.php">&larr; request types</a>');
+ui_top('Purchase Request ' . (string)$req['TicketNumber'],
+       '', '', 'index.php', 'request types');
 flash_show();
 
 /** How a decision reads, and how it should look. */
@@ -292,7 +292,7 @@ foreach ($funds as $f) {
             <?= picklist_select('approval_status', 'decision', 'approved') ?>
         </label>
         <label>Comments <input name="comment" size="40"></label>
-        <button class="primary">Submit purchase approval status</button>
+        <button class="primary">Submit Purchase Approval Status</button>
     </form>
     <?php endforeach; ?>
     <p class="muted">Choosing <strong>Changes Required</strong> sends the whole request back to
@@ -309,7 +309,7 @@ foreach ($funds as $f) {
         <input type="hidden" name="action" value="finance">
         <label>Decision <?= picklist_select('approval_status', 'decision', 'approved') ?></label>
         <label>Comments <input name="comment" size="40"></label>
-        <button class="primary">Submit purchase approval status</button>
+        <button class="primary">Submit Purchase Approval Status</button>
     </form>
 </div>
 <?php endif; ?>
@@ -354,7 +354,7 @@ $awaiting = array_values(array_filter($items,
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="ordered">
         <label>Requisition or PO number <input name="order_reference" size="20"></label>
-        <button class="primary">Mark as ordered</button>
+        <button class="primary">Mark as Ordered</button>
     </form>
 </div>
 <?php endif; ?>
@@ -386,8 +386,8 @@ $awaiting = array_values(array_filter($items,
     <form method="post" class="actions">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="replicate">
-        <button>Replicate as a new purchase request</button>
-        <a class="btn" href="new_purchase.php">Create a new purchase request</a>
+        <button>Replicate as a New Purchase Request</button>
+        <a class="btn" href="new_purchase.php">Create a New Purchase Request</a>
     </form>
 </div>
 <?php ui_bottom(); ?>

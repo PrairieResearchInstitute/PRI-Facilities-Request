@@ -42,6 +42,14 @@ $pdoWork = db('work');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
     $action = (string)($_POST['action'] ?? '');
+    // One list screen holds every row of a list in a single form, so a
+    // hidden remove_id per row all carried the same name and PHP kept the
+    // last. Clicking Remove on any row asked about that row and deleted
+    // the bottom one. The button now carries its own id in its value, and
+    // a value only exists for the button that was pressed.
+    if (isset($_POST['list_remove'])) {
+        $action = 'list_remove';
+    }
 
     if ($action === 'status') {
         $type = (string)$_POST['type'];
@@ -379,7 +387,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'list_remove') {
         require_role('admin');
         require_once __DIR__ . '/lib/picklists.php';
-        $err = picklist_remove((int)($_POST['remove_id'] ?? 0), $user['NetID']);
+        // The pressed button carries the id; remove_id is what the server
+        // confirm page posts back on its second pass.
+        $removeId = (int)($_POST['list_remove'] ?? $_POST['remove_id'] ?? 0);
+        // data-confirm asks in the browser; this asks when it cannot.
+        if (empty($_POST['confirmed'])) {
+            ui_confirm_page('Remove From List', 'Remove this entry from the list?', 'Remove',
+                ['action' => 'list_remove', 'remove_id' => $removeId,
+                 'list_key' => (string)($_POST['list_key'] ?? '')],
+                'admin.php?section=lists&list=' . urlencode((string)($_POST['list_key'] ?? '')), true);
+        }
+        $err = picklist_remove($removeId, $user['NetID']);
         flash_set($err ? 'err' : 'ok', $err ?: 'Removed from the list.');
         header('Location: admin.php?section=lists&list=' . urlencode((string)$_POST['list_key']));
         exit;
@@ -436,6 +454,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } elseif ($action === 'ds_token_clear') {
         require_role('admin');
+        if (empty($_POST['confirmed'])) {
+            ui_confirm_page('Clear the Key',
+                'Clear the key? Any scheduled task using it will stop working.', 'Clear Key',
+                ['action' => 'ds_token_clear'], 'admin.php?section=datafeeds', true);
+        }
         ds_token_clear();
         flash_set('ok', 'Unattended loading is off. Exports can still be dropped here by hand.');
         header('Location: admin.php?section=datafeeds');
@@ -628,8 +651,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $log = [];
             $ok = smtp_send([$to],
-                'PRI Facilities Request System test',
-                "This is a test from the PRI Facilities Request System.\n\n"
+                'PRIOps test',
+                "This is a test from PRIOps.\n\n"
                 . 'Sent by ' . current_user()['DisplayName'] . ' at ' . date('r') . ".\n"
                 . "If this arrived, set notify_mode to smtp in Settings and notices will go out.\n",
                 $log);
@@ -692,7 +715,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (string)$_POST['survey_code'],
             ]);
         }
-        flash_set('ok', 'Leadership for ' . h((string)$_POST['survey_code']) . ' saved in all three databases.');
+        flash_set('ok', 'Leadership for ' . (string)$_POST['survey_code'] . ' saved in all three databases.');
         header('Location: admin.php?section=people');
         exit;
 
@@ -722,8 +745,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$to) {
             flash_set('err', 'That recipient list is empty. Add addresses in Settings first.');
         } else {
-            notify_send('work', 'test', $to, 'PRI Facilities Request System test notification',
-                "This is a test notification from the PRI Facilities Request System.\n\n"
+            notify_send('work', 'test', $to, 'PRIOps test notification',
+                "This is a test notification from PRIOps.\n\n"
                 . 'Sent by ' . $user['DisplayName'] . ' at ' . date('c') . ".\n"
                 . 'Delivery mode: ' . setting('notify_mode', 'log') . '.');
             flash_set('ok', 'Test notification recorded for: ' . implode(', ', $to));
@@ -1104,7 +1127,7 @@ foreach ($sectionGroups as $groupLabel => $items) {
     }
 }
 
-ui_top('Administration', 'Back end &mdash; you are acting as ' . h($user['DisplayName']) . ' (' . h($user['Role']) . ')');
+ui_top('Administration', 'Back end — you are acting as ' . $user['DisplayName'] . ' (' . $user['Role'] . ')');
 flash_show();
 
 // Campus exports go out of date quietly, so they are made to say so.
@@ -1290,7 +1313,8 @@ if ($section === 'map') {
             <label>Urgency
                 <select name="band">
                     <option value="">All</option>
-                    <?php foreach (['critical', 'high', 'medium', 'low'] as $b): ?>
+                    <?php // scoring_band()'s own names; 'medium' and 'low' matched no request. ?>
+                    <?php foreach (['critical', 'high', 'elevated', 'routine'] as $b): ?>
                     <option <?= $qBand === $b ? 'selected' : '' ?>><?= h($b) ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -1329,14 +1353,14 @@ if ($section === 'map') {
                 <input type="hidden" name="id" value="<?= (int)$pick['WorkRequestID'] ?>">
                 <label>Triaged severity
                     <select name="triaged_severity">
-                        <option value="">--</option>
+                        <option value="">Choose one</option>
                         <?php for ($s = 1; $s <= 4; $s++): ?>
                         <option value="<?= $s ?>" <?= (int)$pick['TriagedSeverity'] === $s ? 'selected' : '' ?>><?= $s ?></option>
                         <?php endfor; ?>
                     </select>
                 </label>
                 <label>Estimate $ <input name="estimate" value="<?= h((string)$pick['EstimateAmount']) ?>"></label>
-                <div class="actions"><button name="action" value="triage" class="primary">Save triage</button></div>
+                <div class="actions"><button name="action" value="triage" class="primary">Save Triage</button></div>
             </form>
 
             <form method="post">
@@ -1554,10 +1578,10 @@ if ($section === 'map') {
         <p class="muted">These carry natural keys and plain language headings rather than raw
         columns, for a spreadsheet somebody will actually read.</p>
         <p>
-            <a class="btn" href="export.php?tab=work">Work requests</a>
-            <a class="btn" href="export.php?tab=move">Move items</a>
-            <a class="btn" href="export.php?tab=shop">Shop requests</a>
-            <a class="btn" href="export_safety.php">Safety manifest</a>
+            <a class="btn" href="export.php?tab=work">Work Requests</a>
+            <a class="btn" href="export.php?tab=move">Move Items</a>
+            <a class="btn" href="export.php?tab=shop">Shop Requests</a>
+            <a class="btn" href="export_safety.php">Safety Manifest</a>
         </p>
     </div>
     <?php
@@ -1624,7 +1648,7 @@ if ($section === 'map') {
         Delivery is currently <strong><?= h((string)setting('notify_mode', 'log')) ?></strong>
         from <strong><?= h((string)setting('notify_from', '')) ?></strong>; change that in Settings.</p>
 
-        <h3>Add a recipient</h3>
+        <h3>Add a Recipient</h3>
         <form method="post" class="grid">
             <?= csrf_field() ?>
             <label>When
@@ -1645,8 +1669,8 @@ if ($section === 'map') {
             <label>Email <input type="email" name="email" required></label>
             <label>Name <input name="display_name"></label>
             <label>Why <input name="note" placeholder="fleet maintenance, collections lead"></label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="rule_add" class="primary">Add recipient</button>
+            <div class="actions span-all">
+                <button name="action" value="rule_add" class="primary">Add Recipient</button>
             </div>
         </form>
     </div>
@@ -1665,13 +1689,15 @@ if ($section === 'map') {
                 <td class="muted"><?= h((string)$r['Note']) ?></td>
                 <td class="<?= $r['IsActive'] ? 'good' : '' ?>"><?= $r['IsActive'] ? 'yes' : 'no' ?></td>
                 <td>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="rule_id" value="<?= (int)$r['RuleID'] ?>">
                         <button name="action" value="rule_toggle"><?= $r['IsActive'] ? 'Disable' : 'Enable' ?></button>
                     </form>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="rule_id" value="<?= (int)$r['RuleID'] ?>">
-                        <button name="action" value="rule_delete">Remove</button>
+                        <button name="action" value="rule_delete" class="danger"
+                                data-confirm="Remove this notification rule? Nobody will be told about these requests any more."
+                                data-confirm-title="Remove Rule" data-confirm-ok="Remove" data-confirm-danger>Remove</button>
                     </form>
                 </td>
             </tr>
@@ -1688,7 +1714,7 @@ if ($section === 'map') {
                 <th>Assistant email</th><th>Notify</th><th></th></tr>
             <?php foreach ($surveys as $s): ?>
             <tr>
-                <form method="post" style="display:contents">
+                <form method="post" class="passthrough">
                     <?= csrf_field() ?>
                     <input type="hidden" name="survey_code" value="<?= h((string)$s['Code']) ?>">
                     <td><strong><?= h((string)$s['Code']) ?></strong>
@@ -1721,7 +1747,7 @@ if ($section === 'map') {
             <?php foreach ($ucg['units'] as $u):
                 $c = $ucg['have'][$u['Code'] . '|' . $roleKey] ?? null; ?>
             <tr>
-                <form method="post" style="display:contents">
+                <form method="post" class="passthrough">
                     <?= csrf_field() ?>
                     <input type="hidden" name="unit_code" value="<?= h((string)$u['Code']) ?>">
                     <input type="hidden" name="role_key" value="<?= h((string)$roleKey) ?>">
@@ -1781,19 +1807,19 @@ if ($section === 'map') {
             <label>Display name
                 <input name="from_name" value="<?= h((string)$smtp['from_name']) ?>">
             </label>
-            <label class="check" style="align-self:end">
+            <label class="check end">
                 <input type="checkbox" name="verify_peer" value="1"
                     <?= $smtp['verify_peer'] ? 'checked' : '' ?>> Verify the server certificate
             </label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="smtp_save" class="primary">Save mail settings</button>
+            <div class="actions span-all">
+                <button name="action" value="smtp_save" class="primary">Save Mail Settings</button>
             </div>
         </form>
         <form method="post" class="filters">
             <?= csrf_field() ?>
             <label>Send a real test to <input type="email" name="test_to" required
                    value="<?= h((string)current_user()['Email']) ?>"></label>
-            <button name="action" value="smtp_test">Send test email</button>
+            <button name="action" value="smtp_test">Send Test Email</button>
         </form>
         <p class="muted">Delivery mode is <strong><?= h((string)setting('notify_mode', 'log')) ?></strong>.
         Set notify_mode to <strong>smtp</strong> in Settings once a test arrives; leave it on
@@ -1834,8 +1860,8 @@ if ($section === 'map') {
         </p>
         <form method="post" class="filters">
             <?= csrf_field() ?>
-            <button name="action" value="digest_run">Send digests due now</button>
-            <button name="action" value="digest_run_force">Send to everybody now</button>
+            <button name="action" value="digest_run">Send Digests Due Now</button>
+            <button name="action" value="digest_run_force">Send to Everybody Now</button>
         </form>
         <div class="scroll-x">
         <table>
@@ -1875,7 +1901,7 @@ if ($section === 'map') {
             <label>Survey <input name="test_survey" size="6" placeholder="INHS"></label>
             <label>Kind <input name="test_kind" size="8" placeholder="vehicle"></label>
             <label>Severity <input name="test_severity" size="3" placeholder="3"></label>
-            <button name="action" value="notify_preview">Show recipients</button>
+            <button name="action" value="notify_preview">Show Recipients</button>
         </form>
     </div>
 
@@ -1927,7 +1953,7 @@ if ($section === 'map') {
         <form method="post" enctype="multipart/form-data" class="filters">
             <?= csrf_field() ?>
             <label>Fleet listing CSV <input type="file" name="file" accept=".csv" required></label>
-            <button name="action" value="fleet_import" class="primary">Load fleet listing</button>
+            <button name="action" value="fleet_import" class="primary">Load Fleet Listing</button>
         </form>
         <p class="muted">Recognized column headings: fleet number (or vehicle number), description,
         year, make, model, color, plate, VIN, building number, survey, assigned to. Anything the
@@ -1949,7 +1975,7 @@ if ($section === 'map') {
                 <td><?= h((string)$v['AssignedTo']) ?></td>
                 <td class="<?= $v['IsActive'] ? 'good' : 'muted' ?>"><?= $v['IsActive'] ? 'yes' : 'no' ?></td>
                 <td>
-                    <form method="post" style="margin:0"><?= csrf_field() ?>
+                    <form method="post" class="flat"><?= csrf_field() ?>
                         <input type="hidden" name="id" value="<?= (int)$v['FleetVehicleID'] ?>">
                         <button name="action" value="fleet_toggle"><?= $v['IsActive'] ? 'Retire' : 'Restore' ?></button>
                     </form>
@@ -1984,7 +2010,7 @@ if ($section === 'map') {
             </label>
             <label>Source system <input name="source_system" value="legacy csv" size="18"></label>
             <label>CSV file <input type="file" name="file" accept=".csv" required></label>
-            <button name="action" value="import_stage" class="primary">Stage and validate</button>
+            <button name="action" value="import_stage" class="primary">Stage and Validate</button>
         </form>
         <p class="muted">Column names match the export files, so a downloaded export edits and
         re-imports directly. Buildings resolve by number or through the alias table.</p>
@@ -2011,7 +2037,7 @@ if ($section === 'map') {
             <?= csrf_field() ?>
             <input type="hidden" name="batch_id" value="<?= (int)$staged['batch_id'] ?>">
             <input type="hidden" name="dataset" value="<?= h($staged['dataset']) ?>">
-            <button name="action" value="import_commit" class="primary">Commit the valid rows</button>
+            <button name="action" value="import_commit" class="primary">Commit the Valid Rows</button>
         </form>
     </div>
     <?php elseif ($staged): ?>
@@ -2065,7 +2091,7 @@ if ($section === 'map') {
             <tr>
                 <td><?= h($s['Label']) ?><div class="muted"><?= h($s['SettingKey']) ?></div></td>
                 <td>
-                    <form method="post" class="filters" style="margin:0">
+                    <form method="post" class="filters flat">
                         <?= csrf_field() ?>
                         <input type="hidden" name="key" value="<?= h($s['SettingKey']) ?>">
                         <input name="value" value="<?= h($s['SettingValue']) ?>" size="10">
@@ -2075,6 +2101,7 @@ if ($section === 'map') {
             </tr>
             <?php endforeach; ?>
         </table>
+        <p class="muted">Developed by M. J. Dreslik, with Claude Opus 5</p>
     </div>
     <?php
 
@@ -2088,7 +2115,7 @@ if ($section === 'map') {
         <p class="muted">Pushes the canonical reference copy in PRI_FacilitiesWork to the Move and
         Shop databases, matching rows on natural keys. Idempotent; safe to rerun.</p>
         <form method="post"><?= csrf_field() ?>
-            <button name="action" value="publish" class="primary">Publish reference data</button></form>
+            <button name="action" value="publish" class="primary">Publish Reference Data</button></form>
         <?php if ($publishReport): ?>
             <?php foreach ($publishReport['warnings'] as $wmsg): ?>
                 <p class="bad"><?= h($wmsg) ?></p>
@@ -2143,8 +2170,10 @@ if ($section === 'map') {
             <?php foreach ($counts as $k => $v): ?><?= (int)$v ?> <?= h($k) ?>&nbsp;&nbsp;<?php endforeach; ?></p>
         <form method="post" class="filters">
             <?= csrf_field() ?>
-            <button name="action" value="examples_load" class="primary">Load example data</button>
-            <button name="action" value="examples_clear">Remove example data</button>
+            <button name="action" value="examples_load" class="primary">Load Example Data</button>
+            <button name="action" value="examples_clear" class="danger"
+                data-confirm="Remove the example data? Every example request, person and room goes."
+                data-confirm-title="Remove Example Data" data-confirm-ok="Remove It" data-confirm-danger>Remove Example Data</button>
         </form>
     </div>
     <?php

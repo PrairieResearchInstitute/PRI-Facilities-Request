@@ -59,19 +59,19 @@ function av_orgchart(): void
                     <?= h($d['current'] ?: 'unset') ?>
                     <?= $d['matches'] ? ' (matches)' : '' ?></td>
                 <td>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="survey_code" value="<?= h($d['survey']) ?>">
                         <input type="hidden" name="person_name" value="<?= h($d['name']) ?>">
                         <input type="hidden" name="person_email" value="<?= h($d['email']) ?>">
                         <input type="hidden" name="person_netid" value="<?= h($d['netid']) ?>">
-                        <button name="action" value="org_set_director">Make director</button>
+                        <button name="action" value="org_set_director">Make Director</button>
                     </form>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="survey_code" value="<?= h($d['survey']) ?>">
                         <input type="hidden" name="person_name" value="<?= h($d['name']) ?>">
                         <input type="hidden" name="person_email" value="<?= h($d['email']) ?>">
                         <input type="hidden" name="person_netid" value="<?= h($d['netid']) ?>">
-                        <button name="action" value="org_set_proxy">Make proxy</button>
+                        <button name="action" value="org_set_proxy">Make Proxy</button>
                     </form>
                 </td>
             </tr>
@@ -110,7 +110,7 @@ function av_orgchart(): void
                 <?php endforeach; ?>
             </table>
             <div class="actions">
-                <button name="action" value="org_grant_access" class="primary">Grant access to the ticked</button>
+                <button name="action" value="org_grant_access" class="primary">Grant Access to the Ticked</button>
             </div>
         </form>
     </div>
@@ -214,7 +214,7 @@ function av_accounts(): void
                 <th>Fund</th><th>Description</th><th>Ends</th><th></th></tr>
             <?php foreach ($rows as $r): ?>
             <tr>
-                <form method="post" style="display:contents">
+                <form method="post" class="passthrough">
                     <?= csrf_field() ?>
                     <input type="hidden" name="cfop_code" value="<?= h((string)$r['CfopCode']) ?>">
                     <input type="hidden" name="filter" value="<?= h($filter) ?>">
@@ -326,7 +326,7 @@ function av_stages(): void
                 <th>Ends it</th><th>Tell the submitter</th><th></th></tr>
             <?php foreach ($rows as $r): ?>
             <tr>
-                <form method="post" style="display:contents">
+                <form method="post" class="passthrough">
                     <?= csrf_field() ?>
                     <input type="hidden" name="request_type" value="<?= h($type) ?>">
                     <input type="hidden" name="status_code" value="<?= h((string)$r['StatusCode']) ?>">
@@ -388,8 +388,8 @@ function av_access(): void
                 </select>
             </label>
             <label>Note <input name="note" placeholder="why they have it"></label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="access_add" class="primary">Grant access</button>
+            <div class="actions span-all">
+                <button name="action" value="access_add" class="primary">Grant Access</button>
             </div>
         </form>
     </div>
@@ -410,13 +410,15 @@ function av_access(): void
                 <td class="muted"><?= h((string)$r['Note']) ?></td>
                 <td class="<?= $r['IsActive'] ? 'good' : '' ?>"><?= $r['IsActive'] ? 'yes' : 'no' ?></td>
                 <td>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="access_id" value="<?= (int)$r['AdminAccessID'] ?>">
                         <button name="action" value="access_toggle"><?= $r['IsActive'] ? 'Suspend' : 'Restore' ?></button>
                     </form>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="access_id" value="<?= (int)$r['AdminAccessID'] ?>">
-                        <button name="action" value="access_delete">Remove</button>
+                        <button name="action" value="access_delete" class="danger"
+                                data-confirm="Remove this access? The person loses it as soon as you confirm."
+                                data-confirm-title="Remove Access" data-confirm-ok="Remove" data-confirm-danger>Remove</button>
                     </form>
                 </td>
             </tr>

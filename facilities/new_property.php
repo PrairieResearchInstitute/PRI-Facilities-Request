@@ -115,7 +115,7 @@ function old(string $name, $fallback = ''): string
     return (string)($_POST[$name] ?? $fallback ?? '');
 }
 
-ui_top('Property Update', '<a href="index.php">&larr; request types</a>');
+ui_top('Property Update', '', '', 'index.php', 'request types');
 flash_show();
 ?>
 
@@ -138,13 +138,13 @@ flash_show();
 <form method="post" class="panel">
     <?= csrf_field() ?>
     <input type="hidden" name="do" value="search">
-    <h2>1. Which item?</h2>
+    <h2>1. The Item</h2>
     <label>Inventory number, description, serial number, room, or who has it
         <input name="q" value="<?= h($q) ?>" autofocus
                placeholder="P10E35946 &middot; stereo microscope &middot; Whitfield &middot; 1073_01_1027">
     </label>
     <div class="actions">
-        <button class="primary">Find it</button>
+        <button class="primary">Find It</button>
         <span class="muted" style="margin-left:1rem">Brand new and not in the inventory yet?
             <a href="?kind=register">Register it instead</a>.</span>
     </div>
@@ -225,7 +225,7 @@ $blockFor = [
     <input type="hidden" name="inventory_id" value="<?= (int)$invId ?>">
     <input type="hidden" name="purchase_item_id" value="<?= (int)$purchaseItem ?>">
 
-    <h2>2. What happened?</h2>
+    <h2>2. What Happened</h2>
     <?php foreach (picklist('property_change') as $code => $label): ?>
         <?php /* You cannot register something already in the inventory,
                  and you cannot move something that is not in it yet. */ ?>
@@ -235,7 +235,7 @@ $blockFor = [
     <?php endforeach; ?>
 
     <div data-block="identity" data-kinds="<?= h(implode(' ', $blockFor['identity'])) ?>" hidden>
-        <h3>What is it?</h3>
+        <h3>What It Is</h3>
         <p class="muted" data-only="correct">Fill in only what should be different. A box left
         blank leaves that value alone.</p>
         <div class="grid">
@@ -258,7 +258,7 @@ $blockFor = [
             <label>Acquired
                 <input name="acquired"
                        value="<?= h(old('acquired', $fromPurchase ? date('M j, Y') : '')) ?>"></label>
-            <label style="grid-column:1/-1">Bought on
+            <label class="span-all">Bought on
                 <input name="funding"
                        value="<?= h(old('funding', $fromPurchase
                             ? 'Purchase ' . $fromPurchase['TicketNumber'] : '')) ?>"></label>
@@ -266,11 +266,11 @@ $blockFor = [
     </div>
 
     <div data-block="location" data-kinds="<?= h(implode(' ', $blockFor['location'])) ?>" hidden>
-        <h3>Where is it?</h3>
+        <h3>Where It Is</h3>
         <div class="grid" data-loc-group>
             <label>Building
                 <select name="bldg" data-loc-building>
-                    <option value="">--Select Building--</option>
+                    <option value="">Choose a building</option>
                     <?php foreach ($buildings as $b): ?>
                     <option value="<?= h((string)$b['BldgNumber']) ?>"
                         <?= (string)$b['BldgNumber'] === old('bldg',
@@ -279,23 +279,23 @@ $blockFor = [
                     <?php endforeach; ?>
                 </select></label>
             <label>Floor
-                <select name="floor" data-loc-floor disabled><option value="">--</option></select></label>
+                <select name="floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
             <label>Room
                 <select name="room" data-loc-room
                         data-initial="<?= h(old('room', $fromPurchase['DeliverRoomID'] ?? '')) ?>">
-                    <option value="">--Select a building first--</option>
+                    <option value="">Choose a building first</option>
                 </select></label>
             <label>Survey
                 <input name="survey" size="8"
                        value="<?= h(old('survey', $item['SurveyCode']
                             ?? $fromPurchase['SurveyCode'] ?? $user['SurveyCode'])) ?>"></label>
             <input type="hidden" name="room_code" data-loc-code>
-            <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+            <p class="muted" data-loc-note class="span-all" hidden></p>
         </div>
     </div>
 
     <div data-block="person" data-kinds="<?= h(implode(' ', $blockFor['person'])) ?>" hidden>
-        <h3>Who is responsible for it?</h3>
+        <h3>Who Is Responsible for It</h3>
         <div class="grid">
             <label>Responsible person
                 <input name="person" data-typeahead="person" data-fill="netid:prop_person_netid"
@@ -307,7 +307,7 @@ $blockFor = [
     </div>
 
     <div data-block="removal" data-kinds="<?= h(implode(' ', $blockFor['removal'])) ?>" hidden>
-        <h3>How did it leave?</h3>
+        <h3>How It Left</h3>
         <div class="grid">
             <label>How it left
                 <?= picklist_select('removal_reason', 'removal_reason', old('removal_reason'),
@@ -353,6 +353,4 @@ $blockFor = [
 
 <?php endif; ?>
 
-<script src="assets/location.js"></script>
-<script src="assets/property.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js', 'property.js']); ?>

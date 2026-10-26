@@ -70,7 +70,7 @@ flash_show();
 
 <?php if (!$vehicle): ?>
 <div class="panel">
-    <h2>Which Vehicle?</h2>
+    <h2>The Vehicle</h2>
     <?php if ($fleet !== ''): ?>
     <p class="bad">There is no active vehicle with fleet number
         <strong><?= h($fleet) ?></strong>. Check the sticker, or find it below.</p>
@@ -79,7 +79,7 @@ flash_show();
         <label>Fleet number
             <input name="v" value="<?= h($fleet) ?>" autofocus
                    placeholder="the number on the door or the sticker"></label>
-        <div class="actions"><button class="primary">Find it</button></div>
+        <div class="actions"><button class="primary">Find It</button></div>
     </form>
     <?php
     $some = mileage_fleet($fleet, '');
@@ -114,7 +114,7 @@ flash_show();
     <?php endif; ?>
     <div class="actions">
         <a class="btn primary" href="m.php?v=<?= h(urlencode((string)$vehicle['FleetNumber'])) ?>">Another
-           reading</a>
+           Reading</a>
         <a class="btn" href="index.php">Done</a>
     </div>
 </div>
@@ -166,7 +166,7 @@ flash_show();
     <div id="reader" hidden>
         <canvas id="shot" hidden></canvas>
         <div class="actions">
-            <button type="button" id="tryread">Read it from the photograph</button>
+            <button type="button" id="tryread">Read It from the Photograph</button>
             <span id="readnote" class="muted"></span>
         </div>
     </div>
@@ -176,7 +176,7 @@ flash_show();
     <label>Anything worth saying <input name="note" value="<?= h((string)($_POST['note'] ?? '')) ?>"></label>
 
     <div class="actions">
-        <button class="primary big">Record it</button>
+        <button class="primary big">Record It</button>
     </div>
 </form>
 
@@ -198,6 +198,5 @@ flash_show();
     </table>
 </details>
 <?php endif; ?>
-<script src="assets/odometer.js"></script>
 <?php endif; ?>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['odometer.js']); ?>

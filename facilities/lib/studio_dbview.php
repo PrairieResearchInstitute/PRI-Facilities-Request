@@ -25,7 +25,7 @@ if (db_engine() === 'postgres'):
 ?>
 <div class="studio-body studio-dbbody">
   <section class="studio-dbmain">
-    <h3>The ten registers, as the application reaches them now</h3>
+    <h3>The Ten Registers, as the Application Reaches Them Now</h3>
     <p>They live in one PostgreSQL database, one schema per register. The
        connection is kept in <code>pg.env</code> in the data folder, which the
        owner writes; this page shows it working and does not edit it.</p>
@@ -63,7 +63,7 @@ $okCount = count(array_filter($status, fn($r) => $r['ok']));
 
     <?php if ($onLocal): ?>
       <div class="studio-localdb">
-        <h3>These databases cannot be reached from another computer</h3>
+        <h3>These Databases Cannot Be Reached from Another Computer</h3>
         <p>The server is <code><?= h($cur['host']) ?></code>. LocalDB is a
            user-mode instance: it starts on demand, listens on a private
            named pipe belonging to one Windows account, and has no network
@@ -77,7 +77,7 @@ $okCount = count(array_filter($status, fn($r) => $r['ok']));
       </div>
     <?php endif; ?>
 
-    <h3>The ten databases, as the application reaches them now</h3>
+    <h3>The Ten Databases, as the Application Reaches Them Now</h3>
     <table class="studio-dbtable">
       <thead><tr><th>Register</th><th>Database</th><th>Answer</th><th>Took</th></tr></thead>
       <tbody>
@@ -101,7 +101,7 @@ $okCount = count(array_filter($status, fn($r) => $r['ok']));
   </section>
 
   <aside class="studio-inspector studio-dbform">
-    <h3>Where the databases live</h3>
+    <h3>Where the Databases Live</h3>
     <form method="post">
       <?= csrf_field() ?>
       <input type="hidden" name="file" value="">

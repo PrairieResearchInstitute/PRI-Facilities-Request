@@ -153,12 +153,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Space Request', '<a href="index.php">&larr; request types</a>');
+ui_top('Space Request', '', '', 'index.php', 'request types');
 flash_show();
 
 function space_building_options(array $buildings, string $sel): void
 {
-    echo '<option value="">--Select Building--</option>';
+    echo '<option value="">Choose a building</option>';
     foreach ($buildings as $b) {
         echo '<option value="' . h((string)$b['BldgNumber']) . '" data-bldg="' . h((string)$b['BldgNumber']) . '"'
            . ((string)$b['BldgNumber'] === $sel ? ' selected' : '') . '>'
@@ -260,14 +260,14 @@ function space_building_options(array $buildings, string $sel): void
                 <?php space_building_options($buildings, (string)($_POST['cur_bldg'] ?? '')); ?>
             </select>
         </label>
-        <label>Floor <select name="cur_floor" data-loc-floor disabled><option value="">--</option></select></label>
+        <label>Floor <select name="cur_floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
         <label>Room
             <select name="cur_room" data-loc-room data-initial="<?= h((string)($_POST['cur_room'] ?? '')) ?>">
-                <option value="">--Select a building first--</option>
+                <option value="">Choose a building first</option>
             </select>
         </label>
         <input type="hidden" data-loc-code>
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
 
     <h2>4. Space You Are Asking For</h2>
@@ -279,14 +279,14 @@ function space_building_options(array $buildings, string $sel): void
                 <?php space_building_options($buildings, (string)($_POST['req_bldg'] ?? '')); ?>
             </select>
         </label>
-        <label>Floor <select name="req_floor" data-loc-floor disabled><option value="">--</option></select></label>
+        <label>Floor <select name="req_floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
         <label>Room
             <select name="req_room" data-loc-room data-initial="<?= h((string)($_POST['req_room'] ?? '')) ?>">
-                <option value="">--Select a building first--</option>
+                <option value="">Choose a building first</option>
             </select>
         </label>
         <input type="hidden" data-loc-code>
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
 
     <h2>5. Why, and What It Costs</h2>
@@ -313,7 +313,7 @@ function space_building_options(array $buildings, string $sel): void
         <label>Survey <input id="fund_survey" readonly tabindex="-1"></label>
         <label>Account PI <input id="fund_pi" readonly tabindex="-1"></label>
         <label>Fund manager <input id="fund_fm" readonly tabindex="-1"></label>
-        <label style="grid-column:1/-1">Account purpose
+        <label class="span-all">Account purpose
             <input id="fund_desc" readonly tabindex="-1"></label>
     </div>
     <label>Anything else about the funding, such as a grant name
@@ -321,8 +321,7 @@ function space_building_options(array $buildings, string $sel): void
     </label>
 
     <div class="actions">
-        <button class="primary">Submit space request</button>
+        <button class="primary">Submit Space Request</button>
     </div>
 </form>
-<script src="assets/location.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js']); ?>

@@ -107,7 +107,7 @@ function db_render_unreachable(Throwable $e): void
 /** How to restart the local server - the fix for a driver that failed to start. */
 function db_restart_help_html(): string
 {
-    return '<h2>To fix it, without a reboot</h2>'
+    return '<h2>To Fix It, Without a Reboot</h2>'
         . '<p>Close the console window titled <strong>PRI Facilities'
         . ' Request</strong> (that black window is the server), then start it'
         . ' again from <strong>start-local.bat</strong>. The new process picks'
@@ -127,7 +127,7 @@ function db_driver_help_html(): string
     $script = is_file($odbc . DIRECTORY_SEPARATOR . 'install-driver.cmd');
     $msi    = is_file($odbc . DIRECTORY_SEPARATOR . 'msodbcsql18.msi');
 
-    $h = '<h2>To fix it, without a reboot</h2>';
+    $h = '<h2>To Fix It, Without a Reboot</h2>';
     if ($script) {
         $h .= '<p>The driver ships with the application, and registering it does'
             . ' <strong>not</strong> need a reboot. Open the application folder,'
@@ -189,28 +189,41 @@ function db_render_page(string $title, string $lead, string $bodyHtml): void
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{$t} - PRIOps</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
 <style>
-  :root { --navy:#13294b; --accent:#e84a27; --paper:#f5f1e8; --ink:#1f2733; --muted:#5b6472; --line:#d9d2c4; }
+  /* The house tokens of facilities/assets/app.css, copied because this page
+     renders when the application cannot answer and must not depend on
+     anything else loading. The values track section 2 of docs/design.md:
+     this block held a palette of its own, with a different paper, ink,
+     muted and line, its own body face, and an --accent
+     that meant orange where the app's --accent means navy (PFR-12). */
+  :root { --accent:#13294b; --navy:var(--accent); --accent2:#FF5F05; --il-altgeld:#C84113;
+          --brand-ops:#8FA9C4; --paper:#f5f4f1; --panel:#fff; --ink:#1a1a1a;
+          --muted:#666; --line:#d8d5cf; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--paper); color:var(--ink);
-         font:16px/1.55 "Segoe UI",system-ui,-apple-system,Arial,sans-serif; }
-  header { background:var(--navy); color:#fff; padding:1.1rem 1.4rem;
-           border-bottom:4px solid var(--accent); }
-  header .mark { font-weight:700; font-size:1.15rem; letter-spacing:.01em; }
-  header .mark span { color:var(--accent); }
+         font:16px/1.45 'Source Sans 3','Source Sans Pro',Arial,sans-serif; }
+  header { background:var(--accent); color:#fff; padding:1.1rem 1.4rem;
+           border-bottom:4px solid var(--accent2); }
+  header .mark { font-weight:800; font-size:1.15rem; letter-spacing:.01em;
+                 font-family:Arial,"Segoe UI",sans-serif; }
+  /* "Ops" takes the lockup's own blue, as .brandword i does in app.css.
+     Orange on navy is the one pairing the orange rule rules out. */
+  header .mark span { color:var(--brand-ops); }
   main { max-width:44rem; margin:2.4rem auto; padding:0 1.4rem; }
-  h1 { font-size:1.6rem; margin:0 0 .6rem; color:var(--navy); }
+  h1 { font-size:1.6rem; margin:0 0 .6rem; color:var(--accent); }
   .lead { font-size:1.08rem; margin:0 0 1.4rem; }
-  h2 { font-size:1.05rem; margin:1.6rem 0 .5rem; color:var(--navy); }
+  h2 { font-size:1.05rem; margin:1.6rem 0 .5rem; color:var(--accent); }
   p { margin:0 0 .8rem; }
-  code { background:#fff; border:1px solid var(--line); border-radius:4px;
-         padding:.08rem .35rem; font-family:Consolas,"Courier New",monospace; font-size:.95em; }
-  .reason { background:#fff; border:1px solid var(--line); border-left:4px solid var(--accent);
+  code { background:var(--panel); border:1px solid var(--line); border-radius:4px;
+         padding:.08rem .35rem; font-family:"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace; font-size:.95em; }
+  .reason { background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent2);
             border-radius:4px; padding:.7rem .9rem; }
   .aside { color:var(--muted); font-size:.95rem; margin-top:1.2rem; }
-  .trace { background:#fff; border:1px solid var(--line); border-radius:4px; padding:.7rem .9rem;
+  .trace { background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:.7rem .9rem;
            overflow:auto; font-size:.82rem; color:var(--muted); }
-  .retry { display:inline-block; margin-top:1.4rem; background:var(--navy); color:#fff;
+  .retry { display:inline-block; margin-top:1.4rem; background:var(--accent); color:#fff;
            text-decoration:none; padding:.55rem 1.2rem; border-radius:4px; font-weight:600; }
 </style>
 </head>

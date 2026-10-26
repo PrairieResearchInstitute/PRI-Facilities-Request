@@ -98,7 +98,7 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
 
 <div class="panel actions">
     <a class="btn secondary" href="plans.php">Everything</a>
-    <a class="btn secondary" href="plans.php?show=due">Due Or Overdue</a>
+    <a class="btn secondary" href="plans.php?show=due">Due or Overdue</a>
 </div>
 
 <div class="panel scroll-x">
@@ -124,7 +124,7 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
             <td class="center"><?= (int)$r['Rooms'] ?: '' ?></td>
             <td class="<?= $cls ?>">
                 <?= $r['ReviewDueOn']
-                    ? h(date('j M Y', strtotime((string)$r['ReviewDueOn'])))
+                    ? h(ui_date(strtotime((string)$r['ReviewDueOn'])))
                       . ($days !== null && $days < 0
                          ? ' <strong>' . abs($days) . ' days late</strong>' : '')
                     : '<span class="muted">not set</span>' ?></td>
@@ -136,13 +136,13 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
 
 <?php if ($mayEdit): ?>
 <details class="panel" <?= $errors ? 'open' : '' ?>>
-    <summary><h2 style="display:inline">Register A Plan</h2></summary>
+    <summary><h2 class="inline-block">Register a Plan</h2></summary>
     <form method="post" id="planform">
         <?= csrf_field() ?>
         <div class="grid">
             <label>Kind
                 <select name="type" required>
-                    <option value="">&mdash;</option>
+                    <option value="">Choose one</option>
                     <?php foreach ($types as $t): ?>
                     <option value="<?= h((string)$t['PlanTypeCode']) ?>"
                         <?= (string)($_POST['type'] ?? '') === (string)$t['PlanTypeCode'] ? 'selected' : '' ?>>
@@ -163,7 +163,7 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
                        value="<?= h((string)($_POST['owner_netid'] ?? '')) ?>"></label>
             <label>Survey
                 <select name="survey">
-                    <option value="">&mdash;</option>
+                    <option value="">Choose one</option>
                     <?php foreach ($surveys as $s): ?>
                     <option value="<?= h((string)$s['Code']) ?>"
                         <?= (string)($_POST['survey'] ?? '') === (string)$s['Code'] ? 'selected' : '' ?>>
@@ -188,7 +188,7 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
             <tr><th>Building</th><th>Room</th><th>Whole building</th><th>Note</th><th></th></tr>
             <tr data-row>
                 <td><select name="r_bldg[]">
-                    <option value="">&mdash;</option>
+                    <option value="">Choose one</option>
                     <?php foreach ($buildings as $b): ?>
                     <option value="<?= h((string)$b['BldgNumber']) ?>"><?= h((string)$b['Name']) ?></option>
                     <?php endforeach; ?>
@@ -196,7 +196,8 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
                 <td><input name="r_room[]" size="10" autocomplete="off"></td>
                 <td class="center"><input type="checkbox" name="r_whole[0]" value="1"></td>
                 <td><input name="r_note[]"></td>
-                <td><button type="button" class="link" data-drop>Remove</button></td>
+                <td><button type="button" class="rowdel" title="Remove this place"
+                    aria-label="Remove this place">&times;</button></td>
             </tr>
         </table>
         </div>
@@ -221,13 +222,13 @@ ui_top('Safety Plans', 'Plans, procedures, their owners and when each is next re
         n++;
     });
     table.addEventListener('click', function (e) {
-        if (!e.target.hasAttribute('data-drop')) { return; }
+        var drop = e.target.closest('.rowdel');
+        if (!drop) { return; }
         var rows = table.querySelectorAll('[data-row]');
-        if (rows.length > 1) { e.target.closest('tr').remove(); }
+        if (rows.length > 1) { drop.closest('tr').remove(); }
     });
 })();
 </script>
-<script src="assets/typeahead.js"></script>
 <?php endif; ?>
 
 <?php ui_bottom(); ?>

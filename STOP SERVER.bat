@@ -2,7 +2,7 @@
 rem PRI Facilities Request System - stop the local web server and, on
 rem PostgreSQL, the drive's database cluster.
 rem
-rem The server PRI Facilities Request.vbs starts has no window, so this is
+rem The server tools\ensure-running.ps1 starts has no window, so this is
 rem the way to close it. It ends only the PHP servers serving this folder,
 rem then, when dataMode is postgres, stops the estate cluster on the drive
 rem cleanly (platform D-028, app D-011) unless another app is still

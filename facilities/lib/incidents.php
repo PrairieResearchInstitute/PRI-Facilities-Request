@@ -373,7 +373,7 @@ function incident_notice_body(string $ticket, string $kind, int $ts, string $whe
                               string $what, string $by): string
 {
     return $ticket . ' - ' . picklist_label('incident_kind', $kind) . "\n"
-         . 'When:     ' . date('j F Y, g:ia', $ts) . "\n"
+         . 'When:     ' . ui_datetime($ts) . "\n"
          . 'Where:    ' . ($where !== '' ? $where : 'not recorded') . "\n"
          . 'Reported: ' . $by . "\n\n"
          . $what . "\n";

@@ -1,0 +1,132 @@
+# Sources of truth for PRI Facilities Request.
+# Format: pri-data-sources (PRI AI project template; the skill sits in
+# apps/pri-district-tracker/.claude/skills/pri-data-sources). ODSC collects
+# these files to inventory PRI data. Name credentials by their environment
+# variable, never by their value. Keep this file current with every change.
+
+app: pri-facilities-request
+display_name: PRI Facilities Request
+owner_netid: dreslik
+# University of Illinois Data Classification (Information Security Standard
+# DAT01.1.1): Public, Internal, Sensitive, High Risk. The app takes the highest
+# class of any data it holds (core-lib D-020).
+classification: High Risk
+classification_basis: >
+  The incidents register holds, per named person and NetID, an injury
+  description, the body part, the treatment level, where treatment took place
+  and lost-time days (incidents.rq_incidentpeople, migrations/pgsql/0001_baseline.sql).
+  Medical information joined to a name is personal information under the
+  Illinois PIPA, which core-lib D-020 places in High Risk. Without that register
+  the app would stand at Sensitive (UINs, driver licence state and last four
+  digits, employee room assignments). The app moves, but the incidents register
+  is held: NCSA secures it before it is loaded on Radiant at all, and the
+  Facilities load waits until the owner confirms NCSA's approval (platform D-035).
+radiant:
+  hosting: "Docker containers pri-facilities-request-test and pri-facilities-request-live"
+  databases: [facilities_live, facilities_test]
+
+inputs:
+  # Data this project reads but does not own. A copy here is a COPY; the original stays authoritative.
+  - name: University sign-in identity (NetID and campus groups)
+    location: the authenticating proxy's trusted headers on Radiant, header names in the AUTH_* settings (app D-014)
+    owner: University of Illinois (campus identity and groups)
+    access: proxy headers, no credential held by the app
+    changes: on every request
+    mode: read live; a NetID seen for the first time gets a staff row in work.app_users
+
+  - name: CFOP accounts (PRIDE active grants report)
+    location: pride.prairie.illinois.edu active grants report, activeGrants*.csv
+    owner: Prairie Research Institute business office (PRIDE)
+    access: behind Shibboleth; manual export, or an unattended desktop task that posts with the ingest_token setting
+    changes: nightly at the source; the app flags it stale after 7 days
+    mode: copy into the ref_cfopaccounts tables, refreshed by import (tools/pri-refresh.ps1 and the admin import screen); every load is logged in work.app_dataloads
+
+  - name: PRI employee file (people directory)
+    location: PRIDE, export-employee-file-*.csv
+    owner: Prairie Research Institute (PRIDE)
+    access: behind Shibboleth; manual export
+    changes: weekly; the app flags it stale after 30 days
+    mode: copy into the ref_people tables, refreshed by import
+
+  - name: PRI org chart
+    location: PRIDE, orgChart-*.csv
+    owner: Prairie Research Institute (PRIDE)
+    access: behind Shibboleth; manual export
+    changes: rarely; the app flags it stale after 90 days
+    mode: copy into the ref_people and ref_orgunits tables, refreshed by import
+
+  - name: Banner account codes
+    location: reference/Active Banner Account Codes-*.xlsx (git-ignored reference folder)
+    owner: University of Illinois System (Banner)
+    access: manual export
+    changes: with the fiscal year
+    mode: copy into purchasing.ref_banneraccountcodes, refreshed by import
+
+  - name: Facilities geodatabase and C3PO space, key and inventory exports
+    location: reference/gis and reference/C3PO Data (git-ignored), flattened to storage/gis/*.csv
+    owner: University of Illinois Facilities and Services (C3PO) and the PRI facilities geodatabase
+    access: manual export
+    changes: as space, keys and inventory change on campus
+    mode: copy; tools/gis_etl.py writes the extracts and the app loads them into the gis_* tables
+
+owned:
+  # Data created here that exists nowhere else. These MUST be backed up.
+  - name: PRIOps database (ten registers, one schema each)
+    engine: PostgreSQL 17
+    location: >
+      On Radiant: databases facilities_live and facilities_test, schemas work,
+      move, shop, purchasing, keys, fleet, space, equipment, incidents and plans
+      (app D-010). Until the move: database facilities on the estate cluster on the
+      drive, live since 2026-10-12 (app D-013). The ten SQL Server LocalDB databases
+      stay frozen as the pre-PostgreSQL copy.
+    contains_personal_data: yes
+    personal_data: >
+      staff names, NetIDs, university email addresses, phone numbers, UINs, units,
+      positions and home rooms; room occupants; key holders; driver forms with
+      licence state and the last four licence digits; incident reports naming the
+      people involved with injury, body part, treatment and lost-time details
+    classification: High Risk   # incidents register held until NCSA secures it, before load (platform D-035)
+    backup: >
+      radiant-backup.sh nightly at 02:30: pg_dump -Fc of facilities_live and
+      facilities_test to Taiga, SHA-256 sidecar, restore into a scratch database with
+      a row-count compare. On the drive until the move: platform/scripts/pg-nightly-backup.js,
+      plus the app's own tools/pg/backup.php (pg_dump -Fc with a restore drill) into
+      data/pri-facilities-request/backups.
+    retention: ladder of 7 daily, 4 weekly (Sunday) and 6 monthly verified dumps
+    source: >
+      typed by staff through the request forms and the back office; reference
+      tables imported from the inputs above; owner role and access grants seeded
+      with tools/identity_seed.php
+
+  - name: Storage (uploads, imports, GIS extracts, Studio backups)
+    engine: files
+    location: >
+      On Radiant: /var/www/html/storage in each container, on the named volumes
+      pri-facilities-request-test-storage and pri-facilities-request-live-storage
+      (compose.yaml). Until the move: data/pri-facilities-request/storage, named by
+      dataFolder in config.local.json (app D-001).
+    contains_personal_data: yes
+    personal_data: >
+      attachments to requests and incident reports (photographs and documents that
+      may show people or injuries), imported staff and occupant extracts (names,
+      NetIDs, UINs, room assignments) in storage/imports and storage/gis
+    classification: High Risk
+    backup: >
+      radiant-backup.sh folder backup (being added). The imports and GIS extracts can be rebuilt from the
+      inputs; the uploaded attachments exist nowhere else.
+    retention: none yet
+    source: uploaded by staff through the forms; imports and extracts from the inputs above; Studio copies written by facilities/studio.php
+
+outputs:
+  # Files or records this project produces, reproducible from inputs, owned data and code.
+  - name: Register, audit and safety exports
+    location: CSV and XLSX files downloaded by the browser
+    produced_by: facilities/export.php, export_all.php, export_table.php, export_audit.php, export_audit_xlsx.php, export_safety.php
+
+  - name: Email notifications and digests
+    location: recipients' university mailboxes, through the SMTP_* settings
+    produced_by: the notify rules in the request workflow and tools/send_digests.php
+
+  - name: Fleet vehicle stickers with QR codes
+    location: printed pages
+    produced_by: facilities/stickers.php

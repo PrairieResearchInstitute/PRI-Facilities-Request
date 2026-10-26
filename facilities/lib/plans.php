@@ -257,7 +257,7 @@ function plan_review(int $id, string $outcome, string $note, array $user): strin
     }
     $st = $pdo->prepare('SELECT ReviewDueOn FROM rq.SafetyPlans WHERE SafetyPlanID = ?');
     $st->execute([$id]);
-    return 'Recorded. Next due ' . date('j F Y', strtotime((string)$st->fetchColumn())) . '.';
+    return 'Recorded. Next due ' . ui_date(strtotime((string)$st->fetchColumn())) . '.';
 }
 
 /**

@@ -100,6 +100,35 @@ function cluster_other_connections(?string &$why): ?int
     }
 }
 
+/**
+ * Start the cluster on Windows the way launch() in estate-pg.js does, for a
+ * computer with no Node to run that script. The server's own output is
+ * appended to the cluster log rather than piped, because a pipe handed to a
+ * server that outlives this process would be held open for its whole life;
+ * the log is where a failed start explains itself. Returns when the cluster
+ * answers pg_isready, or after 60 seconds, which is what estate-pg.js waits.
+ */
+function cluster_launch_windows(array $p): void
+{
+    $env = getenv();
+    $env['PGTZ'] = 'UTC';
+    $spec = [
+        0 => ['file', 'NUL', 'r'],
+        1 => ['file', $p['log'], 'a'],
+        2 => ['file', $p['log'], 'a'],
+    ];
+    $h = @proc_open(estate_pg_launch_command($p), $spec, $pipes, null, $env, ['bypass_shell' => true]);
+    if (is_resource($h)) {
+        proc_close($h);
+    }
+    for ($waited = 0; $waited < 60000; $waited += 250) {
+        if (cluster_running($p)) {
+            return;
+        }
+        usleep(250000);
+    }
+}
+
 function cluster_start(array $p, callable $say): int
 {
     if (!cluster_initialized($p)) {
@@ -122,7 +151,11 @@ function cluster_start(array $p, callable $say): int
         if (!is_dir(dirname($p['log']))) {
             @mkdir(dirname($p['log']), 0777, true);
         }
-        cluster_run(array_merge([estate_pg_program('pg_ctl', $p)], estate_pg_start_args($p)), false);
+        if (PHP_OS_FAMILY === 'Windows') {
+            cluster_launch_windows($p);
+        } else {
+            cluster_run(array_merge([estate_pg_program('pg_ctl', $p)], estate_pg_start_args($p)), false);
+        }
     }
     if (!cluster_running($p)) {
         $say('PostgreSQL on the drive did not start (' . $how . '). Its log: ' . $p['log']);

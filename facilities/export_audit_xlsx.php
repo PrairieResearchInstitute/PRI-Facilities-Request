@@ -98,8 +98,8 @@ foreach (APP_BACKLOG as $section => $items) {
 
 // ---- read me, built once the numbers above exist --------------------
 $readme = [
-    ['PRI Facilities Request System - the audit, whole'],
-    ['Produced', date('j F Y, g:ia')],
+    ['PRIOps - the audit, whole'],
+    ['Produced', date('F j, Y, g:ia')],
     [],
     ['This workbook is the working copy. Sort it, filter it, split the tabs between people,'],
     ['and mark rows off as they are fixed. It regenerates from the live databases, so pull a'],

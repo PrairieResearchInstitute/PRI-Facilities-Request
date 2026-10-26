@@ -2,7 +2,7 @@
   { "file": "tools/php/extras/sbom/php.cdx.json", "match": "http", "reason": "software bill of materials shipped with the bundled PHP build; vendor file, not app code" },
   { "file": "tools/php/extras/sbom/php.spdx.json", "match": "http", "reason": "software bill of materials shipped with the bundled PHP build; vendor file, not app code" },
   { "file": "tools/php/extras/sbom/php.openvex.json", "match": "http", "reason": "software bill of materials shipped with the bundled PHP build; vendor file, not app code" },
-  { "file": "PRI Facilities Request.vbs", "match": "http://127.0.0.1:", "reason": "the launcher's own local server on this computer" },
+  { "file": "tools/ensure-running.ps1", "match": "http://127.0.0.1:", "reason": "the launcher's own local server on this computer" },
   { "file": "start-local.bat", "match": "http://127.0.0.1:%PORT%/", "reason": "the launcher's own local server on this computer" },
   { "file": "tools/keepalive.php", "match": "http://127.0.0.1:", "reason": "polls the launcher's own local server on this computer" },
   { "file": "*", "match": "http://schemas.openxmlformats.org/", "reason": "Office Open XML namespace identifiers written into docx, pptx and xlsx files; never fetched" },

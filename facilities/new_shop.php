@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Shop Services Work Request', '<a href="index.php">&larr; request types</a>');
+ui_top('Shop Services Work Request', '', '', 'index.php', 'request types');
 flash_show();
 ?>
 <div class="panel">
@@ -252,7 +252,7 @@ flash_show();
         <label>Survey <input id="cfop_survey" readonly tabindex="-1"></label>
         <label>Account PI <input id="cfop_pi" readonly tabindex="-1"></label>
         <label>Fund Manager <input id="cfop_fm" readonly tabindex="-1"></label>
-        <label style="grid-column:1/-1">Account purpose
+        <label class="span-all">Account purpose
             <input id="cfop_desc" readonly tabindex="-1"></label>
     </div>
 
@@ -285,7 +285,7 @@ flash_show();
         <div class="grid" data-loc-group>
             <label>Building (where the work lands)
                 <select name="bldg" data-loc-building>
-                    <option value="">--Select Building--</option>
+                    <option value="">Choose a building</option>
                     <?php foreach ($buildings as $b): ?>
                     <option value="<?= h((string)$b['BldgNumber']) ?>" data-bldg="<?= h((string)$b['BldgNumber']) ?>"
                         <?= (string)$b['BldgNumber'] === (string)($_POST['bldg'] ?? '') ? 'selected' : '' ?>>
@@ -294,17 +294,17 @@ flash_show();
                 </select>
             </label>
             <label>Floor
-                <select name="floor" data-loc-floor disabled><option value="">--</option></select>
+                <select name="floor" data-loc-floor disabled><option value="">Choose one</option></select>
             </label>
             <label>Room
                 <select name="room" data-loc-room data-initial="<?= h((string)($_POST['room'] ?? '')) ?>">
-                    <option value="">--Select a building first--</option>
+                    <option value="">Choose a building first</option>
                 </select>
             </label>
             <input type="hidden" name="room_code" data-loc-code value="<?= h((string)($_POST['room_code'] ?? '')) ?>">
             <label>Written location
                 <input name="location" maxlength="300" value="<?= h((string)($_POST['location'] ?? '')) ?>"></label>
-            <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+            <p class="muted" data-loc-note class="span-all" hidden></p>
         </div>
 
         <div class="grid">
@@ -334,7 +334,7 @@ flash_show();
         <div class="grid">
             <label>Which vehicle
                 <select name="fleet_vehicle_id" id="fleet_vehicle_id">
-                    <option value="">--Select Vehicle--</option>
+                    <option value="">Choose a vehicle</option>
                     <?php foreach ($vehicles as $v): ?>
                     <option value="<?= (int)$v['FleetVehicleID'] ?>"
                         data-plate="<?= h((string)($v['PlateNumber'] ?? '')) ?>"
@@ -393,9 +393,7 @@ flash_show();
     </label>
 
     <div class="actions">
-        <button class="primary">Submit shop request</button>
+        <button class="primary">Submit Shop Request</button>
     </div>
 </form>
-<script src="assets/location.js"></script>
-<script src="assets/shop.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js', 'shop.js']); ?>

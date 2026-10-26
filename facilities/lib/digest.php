@@ -146,7 +146,7 @@ function digest_due(array $pref, ?int $now = null): bool
 /** The message. Plain text, because it is read on a phone in a corridor. */
 function digest_render(array $user, array $items, string $token): string
 {
-    $lines = ['Outstanding work in the PRI Facilities Request System', ''];
+    $lines = ['Outstanding work in PRIOps', ''];
     $base = notify_base_url();
 
     if ($items['decisions']) {
@@ -233,7 +233,7 @@ function digest_run(int $limit = 25, bool $force = false, ?string $onlyNetID = n
             continue;
         }
 
-        $subject = 'PRI facilities: ' . count($items['decisions']) . ' waiting on you, '
+        $subject = 'PRIOps: ' . count($items['decisions']) . ' waiting on you, '
                  . $count . ' item(s) in total';
         notify_send('work', 'digest', [(string)$pref['Email']], $subject,
             digest_render($user, $items, (string)$pref['Token']), null, null);

@@ -270,7 +270,7 @@ function notify_shop_request(array $req, array $vehicle = null): void
         'request_kind' => $vehicle ? 'vehicle' : 'general',
         'building'     => $req['BldgNumber'] ?? '',
     ], $extra);
-    $subject = 'Action Required: Shop Facilities Request ' . $req['TicketNumber'];
+    $subject = 'PRIOps: ' . $req['TicketNumber'] . ' needs a decision';
 
     $lines = [
         'Shop Request Received',
@@ -314,8 +314,8 @@ function notify_work_request(array $req): void
         'life_safety'   => !empty($req['LifeSafety']),
         'specimen_risk' => !empty($req['SpecimenRisk']),
     ]);
-    $subject = ($urgent ? 'Urgent: ' : '') . 'Facilities Work Request ' . $req['TicketNumber']
-             . ' - ' . $req['Title'];
+    $subject = 'PRIOps: ' . ($urgent ? 'Urgent, ' : '') . $req['TicketNumber']
+             . ' submitted, ' . $req['Title'];
 
     $lines = [
         'Facilities Work Request Received',
@@ -351,7 +351,7 @@ function notify_move_request(array $req): void
         'survey'   => $req['SurveyCode'] ?? '',
         'building' => $req['BldgNumber'] ?? '',
     ]);
-    $subject = 'Move Request ' . $req['TicketNumber'] . ' submitted';
+    $subject = 'PRIOps: ' . $req['TicketNumber'] . ' submitted';
     $lines = [
         'Move Request Received',
         '',

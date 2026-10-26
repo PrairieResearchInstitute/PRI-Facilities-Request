@@ -83,8 +83,8 @@ function av_people(): void
                     <?php foreach (APP_ROLES as $r): ?><option><?= h($r) ?></option><?php endforeach; ?>
                 </select>
             </label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="user_add" class="primary">Add person</button>
+            <div class="actions span-all">
+                <button name="action" value="user_add" class="primary">Add Person</button>
             </div>
         </form>
     </div>
@@ -109,7 +109,7 @@ function av_people(): void
                 <td><?= h((string)$u['NetID']) ?></td>
                 <td><?= h((string)$u['SurveyCode']) ?></td>
                 <td>
-                    <form method="post" class="filters" style="margin:0">
+                    <form method="post" class="filters flat">
                         <?= csrf_field() ?>
                         <input type="hidden" name="netid" value="<?= h((string)$u['NetID']) ?>">
                         <select name="role">
@@ -123,7 +123,7 @@ function av_people(): void
                 <td class="<?= $u['IsActive'] ? 'good' : 'muted' ?>"><?= $u['IsActive'] ? 'yes' : 'no' ?></td>
                 <td class="muted"><?= $u['LastLoginAt'] ? h(date('M j, Y', strtotime((string)$u['LastLoginAt']))) : '' ?></td>
                 <td>
-                    <form method="post" style="margin:0"><?= csrf_field() ?>
+                    <form method="post" class="flat"><?= csrf_field() ?>
                         <input type="hidden" name="netid" value="<?= h((string)$u['NetID']) ?>">
                         <button name="action" value="user_active"><?= $u['IsActive'] ? 'Deactivate' : 'Reactivate' ?></button>
                     </form>
@@ -171,13 +171,13 @@ function av_space(): void
             <label>Criticality
                 <input name="criticality" size="4" value="<?= h((string)($edit['Criticality'] ?? '0')) ?>">
             </label>
-            <label class="check" style="align-self:end">
+            <label class="check end">
                 <input type="checkbox" name="on_campus" value="1"
                     <?= ($edit['IsOnCampus'] ?? 1) ? 'checked' : '' ?>> On campus</label>
-            <label class="check" style="align-self:end">
+            <label class="check end">
                 <input type="checkbox" name="remote" value="1"
                     <?= ($edit['IsRemote'] ?? 0) ? 'checked' : '' ?>> Remote site (priority bump)</label>
-            <div class="actions" style="grid-column:1/-1">
+            <div class="actions span-all">
                 <button name="action" value="<?= $edit ? 'bldg_edit' : 'bldg_add' ?>" class="primary">
                     <?= $edit ? 'Save building' : 'Add building' ?></button>
                 <?php if ($edit): ?><a class="btn" href="admin.php?section=space">Cancel</a><?php endif; ?>
@@ -204,7 +204,7 @@ function av_space(): void
                 <td>
                     <a class="btn" href="admin.php?section=space&amp;edit_bldg=<?= h((string)$b['BldgNumber']) ?>">Edit</a>
                     <a class="btn" href="admin.php?section=space&amp;bldg=<?= h((string)$b['BldgNumber']) ?>">Rooms</a>
-                    <form method="post" style="display:inline"><?= csrf_field() ?>
+                    <form method="post" class="inline-block"><?= csrf_field() ?>
                         <input type="hidden" name="bldg_number" value="<?= h((string)$b['BldgNumber']) ?>">
                         <button name="action" value="bldg_active"><?= $b['IsActive'] ? 'Retire' : 'Restore' ?></button>
                     </form>
@@ -235,8 +235,8 @@ function av_space(): void
             <label>Category description <input name="category_desc" placeholder="Office"></label>
             <label>Area sq ft <input name="area" size="8"></label>
             <label>Survey <input name="survey" size="8"></label>
-            <div class="actions" style="grid-column:1/-1">
-                <button name="action" value="room_add" class="primary">Add room</button>
+            <div class="actions span-all">
+                <button name="action" value="room_add" class="primary">Add Room</button>
             </div>
         </form>
 
@@ -250,7 +250,7 @@ function av_space(): void
             <div class="filters">
                 <label>Move into
                     <select name="to_bldg" required>
-                        <option value="">--Select Building--</option>
+                        <option value="">Choose a building</option>
                         <?php foreach ($buildings as $b): if (!$b['IsActive'] || $b['BldgNumber'] === $bldg) continue; ?>
                         <option value="<?= h((string)$b['BldgNumber']) ?>">
                             <?= h($b['BldgNumber'] . ' — ' . $b['Name']) ?></option>
@@ -259,7 +259,7 @@ function av_space(): void
                 </label>
                 <label class="check"><input type="checkbox" name="retire_source" value="1">
                     Retire <?= h($bldg) ?> afterwards (a leased site given up)</label>
-                <button name="action" value="rooms_move">Move selected rooms</button>
+                <button name="action" value="rooms_move">Move Selected Rooms</button>
             </div>
             <div class="scroll-x">
             <table>

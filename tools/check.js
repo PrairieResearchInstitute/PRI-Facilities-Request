@@ -145,12 +145,16 @@ if (php) {
     const epg = require(epgFile);
     const src = fs.readFileSync(epgFile, 'utf8');
     if (epg.PORT !== 5433 || epg.HOST !== '127.0.0.1') fail('estate-pg.js listens on ' + epg.HOST + ':' + epg.PORT + ', not 127.0.0.1:5433');
-    // tools/pg/cluster.php drives pg_ctl itself when no Node exists; its arguments must stay those of estate-pg.js.
-    const mirrored = ["['start', '-D', p.data, '-l', p.log, '-w', '-t', '60', '-o', '-p ' + PORT]",
+    // tools/pg/cluster.php starts and stops the cluster itself when no Node exists; what it
+    // passes must stay what estate-pg.js passes. On Windows that is the cmd.exe start line
+    // from launch(), which replaced pg_ctl start on 16 Oct 2026 because pg_ctl opened a
+    // window; pg_ctl stop and pg_isready are unchanged.
+    const mirrored = ["'start \"\" /b ' + q(exePath) + ' -D ' + q(dataPath) + ' -p ' + portOf(p)",
+      "['/d', '/s', '/c', ",
       "['stop', '-D', p.data, '-m', 'fast', '-w', '-t', '60']",
-      "['-h', HOST, '-p', String(PORT), '-t', '3']"];
+      "['-h', HOST, '-p', portOf(p), '-t', '3']"];
     const drift = mirrored.filter((m) => !src.includes(m));
-    if (drift.length) fail('estate-pg.js changed its pg_ctl or pg_isready arguments; update tools/pg/estate.php to match: ' + drift.join(' | '));
+    if (drift.length) fail('estate-pg.js changed how it starts or checks the cluster; update tools/pg/estate.php to match: ' + drift.join(' | '));
     if (php) {
       const r = spawnSync(php, ['-r', "require 'tools/pg/estate.php'; echo json_encode(['p' => estate_pg_paths(), 'port' => ESTATE_PG_PORT, 'host' => ESTATE_PG_HOST]);"], { cwd: APP, encoding: 'utf8', timeout: 30000 });
       let mine = null;
@@ -168,6 +172,36 @@ if (php) {
   if (gr.status === 0 && gr.stdout.trim()) fail('tracked files still name the PostgreSQL service on C:: ' + gr.stdout.trim().split(/\r?\n/).slice(0, 5).join(' | '));
   else if (gr.status > 1) fail('git grep failed: ' + (gr.stderr || '').trim());
   else pass('no tracked file names the PostgreSQL service on C: (port 5432, postgresql-x64-17, Program Files)');
+}
+
+// 9. Launcher (D-018): tools/ensure-running.ps1 replaces the retired .vbs and parses; no .vbs is tracked.
+{
+  const launcher = path.join(APP, 'tools', 'ensure-running.ps1');
+  const vbs = spawnSync('git', ['-c', 'safe.directory=*', 'ls-files', '--', '*.vbs'], { cwd: APP, encoding: 'utf8' });
+  const vbsTracked = vbs.status === 0 && vbs.stdout.trim();
+  if (vbsTracked) fail('a .vbs launcher is tracked again (platform D-037, app D-018): ' + vbs.stdout.trim().split(/\r?\n/).join(', '));
+  if (!fs.existsSync(launcher)) fail('tools/ensure-running.ps1 is missing: the desktop shortcut has nothing to run');
+  else if (process.platform === 'win32') {
+    const ps = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
+      '$e = $null; [void][System.Management.Automation.Language.Parser]::ParseFile($env:LAUNCHER, [ref]$null, [ref]$e); if ($e) { $e | ForEach-Object { $_.Message }; exit 1 }'],
+      { env: Object.assign({}, process.env, { LAUNCHER: launcher }), encoding: 'utf8', timeout: 60000 });
+    if (ps.status !== 0) fail('tools/ensure-running.ps1 does not parse: ' + ((ps.stdout || '') + (ps.stderr || '')).trim().slice(0, 300));
+    else if (!vbsTracked) pass('launcher: tools/ensure-running.ps1 parses; no .vbs tracked');
+  }
+}
+
+// The authorship credit (drez-ui-elements rule 27): ui_bottom() in facilities/lib/ui.php
+// prints it in every page's footer, and the NOTICE at the repository root carries it.
+{
+  const CREDIT = 'Developed by M. J. Dreslik, with Claude Opus 5';
+  const read = (f) => { try { return fs.readFileSync(path.join(APP, f), 'utf8'); } catch (_) { return null; } };
+  const ui = read('facilities/lib/ui.php') || '';
+  const bottom = ui.slice(ui.indexOf('function ui_bottom'));
+  if (bottom.includes('<span class="credit">' + CREDIT + '</span></footer>')) pass('credit: the footer carries the credit line');
+  else fail('credit: ui_bottom() in facilities/lib/ui.php lacks the footer line "' + CREDIT + '"');
+  const notice = read('NOTICE');
+  if (notice && notice.includes(CREDIT)) pass('credit: NOTICE carries the credit');
+  else fail('credit: NOTICE is missing or lacks "' + CREDIT + '"');
 }
 
 if (failures.length) { say('CHECK FAILED: ' + failures.length + ' problem(s)'); process.exit(1); }

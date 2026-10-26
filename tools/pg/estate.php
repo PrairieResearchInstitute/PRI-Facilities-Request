@@ -96,10 +96,42 @@ function estate_node(?array $p = null): ?string
     return null;
 }
 
-/** pg_ctl arguments for a start, exactly as start() in estate-pg.js passes them. */
+/**
+ * pg_ctl arguments for a start. estate-pg.js stopped starting the cluster
+ * this way on 16 Oct 2026, because pg_ctl start opened a console window on
+ * the owner's desktop, so on Windows the fallback uses
+ * estate_pg_launch_command() instead. These arguments stay for every other
+ * host, where pg_ctl opens nothing.
+ */
 function estate_pg_start_args(array $p): array
 {
     return ['start', '-D', $p['data'], '-l', $p['log'], '-w', '-t', '60', '-o', '-p ' . ESTATE_PG_PORT];
+}
+
+/**
+ * The Windows command line that launch() in estate-pg.js uses, as one
+ * verbatim string for proc_open with bypass_shell.
+ *
+ * `start "" /b` is what keeps the window away: postgres.exe spawned directly
+ * has no console, so Windows gives each child its own window, five per start,
+ * and closing one kills that process. Started this way the server is a
+ * grandchild of the caller, so it leaves the caller's job and outlives it.
+ * The empty "" is the window title that `start` would otherwise take from the
+ * quoted program path.
+ *
+ * One deliberate difference from estate-pg.js: that script resolves the
+ * volume path first so no process carries a drive letter (D-039). This
+ * fallback runs only on a computer with no Node at all, which the estate
+ * does not have, so it starts from the ordinary path rather than carrying a
+ * second copy of the volume lookup.
+ */
+function estate_pg_launch_command(array $p): string
+{
+    $q = fn(string $x): string => '"' . $x . '"';
+    return 'cmd.exe /d /s /c start "" /b '
+        . $q(estate_pg_program('postgres', $p))
+        . ' -D ' . $q($p['data'])
+        . ' -p ' . ESTATE_PG_PORT;
 }
 
 /** pg_ctl arguments for the fast, clean stop of stop() in estate-pg.js. */

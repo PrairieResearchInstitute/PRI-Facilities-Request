@@ -72,16 +72,20 @@ function av_lists(): void
                         <td><input type="checkbox" name="active[<?= $id ?>]" value="1"
                                    <?= (int)$r['IsActive'] === 1 ? 'checked' : '' ?>></td>
                         <td><?php if ((int)$r['IsProtected'] === 0): ?>
-                            <button name="action" value="list_remove" formnovalidate
-                                    onclick="return confirm('Remove <?= h((string)$r['Code']) ?> from this list?')"
+                            <?php /* The id rides on the button, not on a hidden field: every
+                                      row shares this one form, so a per-row hidden remove_id
+                                      gave PHP eight values under one name and it kept the last. */ ?>
+                            <button name="list_remove" value="<?= $id ?>" formnovalidate
+                                    data-confirm="Remove <?= h((string)$r['Code']) ?> from this list?"
+                                    data-confirm-title="Remove From List" data-confirm-ok="Remove"
+                                    data-confirm-danger
                                     class="danger" title="Remove">&times;</button>
-                            <input type="hidden" name="remove_id" value="<?= $id ?>">
                         <?php endif; ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </table>
                 <div class="actions">
-                    <button name="action" value="list_save" class="primary">Save this list</button>
+                    <button name="action" value="list_save" class="primary">Save This List</button>
                 </div>
             </form>
 
@@ -91,7 +95,7 @@ function av_lists(): void
                 <label>New code <input name="new_code" placeholder="short_code"></label>
                 <label>What people read <input name="new_label" size="34"></label>
                 <label>Order <input name="new_sort" size="4" value="50"></label>
-                <button name="action" value="list_add">Add to this list</button>
+                <button name="action" value="list_add">Add to This List</button>
             </form>
         </details>
         <?php endforeach; ?>

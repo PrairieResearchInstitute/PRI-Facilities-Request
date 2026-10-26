@@ -151,7 +151,7 @@ ui_top('Studio', 'The application, editable from inside it', 'studio');
     <section class="studio-main">
       <?php if ($file === ''): ?>
         <div class="studio-empty">
-          <h2>The application, from inside itself</h2>
+          <h2>The Application, from Inside Itself</h2>
           <p>Pick a file on the left. Every save is checked before it is written,
              the copy it replaces is kept, and putting it back is one click.</p>
           <p class="studio-empty-note"><?= count($tree) ?> files are editable here.</p>
@@ -171,16 +171,16 @@ ui_top('Studio', 'The application, editable from inside it', 'studio');
     </section>
     <aside class="studio-inspector">
       <?php if ($file === ''): ?>
-        <h3>Nothing open</h3>
+        <h3>Nothing Open</h3>
         <p class="studio-hint">The inspector shows what is true about the open
            file, and every copy the Studio has kept of it.</p>
       <?php else: ?>
-        <h3>This file</h3>
+        <h3>This File</h3>
         <dl class="studio-facts">
           <dt>Kind</dt><dd><?= h(strtoupper((string)pathinfo($file, PATHINFO_EXTENSION))) ?></dd>
           <dt>Size</dt><dd><?= number_format((int)@filesize($full)) ?> bytes</dd>
           <dt>Lines</dt><dd><?= number_format(substr_count($code, chr(10)) + 1) ?></dd>
-          <dt>Changed</dt><dd><?= h(date('j M Y H:i', (int)@filemtime($full))) ?></dd>
+          <dt>Changed</dt><dd><?= h(ui_datetime((int)@filemtime($full))) ?></dd>
           <dt>Writable</dt><dd><?= is_writable($full) ? 'yes' : 'no - read only' ?></dd>
         </dl>
         <?php if (basename($file) === 'config.php'): ?>
@@ -189,7 +189,7 @@ ui_top('Studio', 'The application, editable from inside it', 'studio');
              rewrites it.</p>
         <?php endif; ?>
 
-        <h3>Kept copies</h3>
+        <h3>Kept Copies</h3>
         <?php if (!$backups): ?>
           <p class="studio-hint">None yet. The first save will keep one.</p>
         <?php else: ?>
@@ -204,7 +204,7 @@ ui_top('Studio', 'The application, editable from inside it', 'studio');
                   <span class="studio-when"><?= h(substr($b['when'], 6, 2) . ' ' . substr($b['when'], 4, 2) . '/' . substr($b['when'], 0, 4)) ?>
                     <em><?= h(substr($b['when'], 9, 2) . ':' . substr($b['when'], 11, 2)) ?></em></span>
                   <span class="studio-bytes"><?= number_format($b['size']) ?> b</span>
-                  <button type="submit" class="studio-restore">Put back</button>
+                  <button type="submit" class="studio-restore">Put Back</button>
                 </form>
               </li>
             <?php endforeach; ?>
@@ -230,6 +230,5 @@ ui_top('Studio', 'The application, editable from inside it', 'studio');
   </div>
 
 </div>
-<script src="assets/studio.js" defer></script>
 <?php
-ui_bottom();
+ui_bottom(['studio.js defer']);

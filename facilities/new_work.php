@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Facilities Work Request', '<a href="index.php">&larr; request types</a>');
+ui_top('Facilities Work Request', '', '', 'index.php', 'request types');
 flash_show();
 ?>
 <div class="panel">
@@ -214,7 +214,7 @@ flash_show();
     <div class="grid">
         <label>Building
             <select name="building_id" id="building_id" required data-loc-building>
-                <option value="">--Select Building--</option>
+                <option value="">Choose a building</option>
                 <?php foreach ($buildings as $b): ?>
                 <option value="<?= (int)$b['BuildingID'] ?>"
                     data-bldg="<?= h((string)$b['BldgNumber']) ?>"
@@ -226,7 +226,7 @@ flash_show();
         </label>
         <label>Work type
             <select name="type_id" id="type_id" required>
-                <option value="">--Select Type--</option>
+                <option value="">Choose a type</option>
                 <?php foreach ($types as $t): ?>
                 <option value="<?= (int)$t['WorkTypeID'] ?>"
                     data-phone="<?= (int)$t['IsPhoneOnly'] ?>"
@@ -252,7 +252,7 @@ flash_show();
     </div>
 
     <div class="actions">
-        <button type="button" id="continuebtn" class="primary" disabled>Continue to the full form</button>
+        <button type="button" id="continuebtn" class="primary" disabled>Continue to the Full Form</button>
     </div>
 
     <div id="fullform" <?= ($_SERVER['REQUEST_METHOD'] === 'POST' || demo_fill_full())
@@ -261,7 +261,7 @@ flash_show();
         <div class="grid">
             <label>Nature of request
                 <select name="nature_id">
-                    <option value="">--Select--</option>
+                    <option value="">Choose one</option>
                     <?php foreach ($natures as $n): ?>
                     <option value="<?= (int)$n['NatureID'] ?>"
                         <?= (int)$n['NatureID'] === (int)($_POST['nature_id'] ?? 0) ? 'selected' : '' ?>>
@@ -284,16 +284,16 @@ flash_show();
         <div data-loc-group class="grid">
             <label>Floor
                 <select name="floor" data-loc-floor disabled>
-                    <option value="">--Select a building first--</option>
+                    <option value="">Choose a building first</option>
                 </select>
             </label>
             <label>Room
                 <select name="room" data-loc-room data-initial="<?= h((string)($_POST['room'] ?? '')) ?>">
-                    <option value="">--Select a building first--</option>
+                    <option value="">Choose a building first</option>
                 </select>
             </label>
             <input type="hidden" name="room_code" data-loc-code value="<?= h((string)($_POST['room_code'] ?? '')) ?>">
-            <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+            <p class="muted" data-loc-note class="span-all" hidden></p>
         </div>
         <label>Where exactly? (written location &mdash; e.g., east stairwell landing, loading dock apron)
             <input name="location" id="location" maxlength="300" value="<?= h((string)($_POST['location'] ?? '')) ?>">
@@ -343,7 +343,7 @@ flash_show();
             <label>Survey <input id="cfop_survey" readonly tabindex="-1"></label>
             <label>Account PI <input id="cfop_pi" readonly tabindex="-1"></label>
             <label>Fund manager <input id="cfop_fm" readonly tabindex="-1"></label>
-            <label style="grid-column:1/-1">Account purpose
+            <label class="span-all">Account purpose
                 <input id="cfop_desc" readonly tabindex="-1"></label>
         </div>
 
@@ -355,10 +355,8 @@ flash_show();
         </label>
 
         <div class="actions">
-            <button class="primary">Submit work request</button>
+            <button class="primary">Submit Work Request</button>
         </div>
     </div>
 </form>
-<script src="assets/location.js"></script>
-<script src="assets/work.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js', 'work.js']); ?>

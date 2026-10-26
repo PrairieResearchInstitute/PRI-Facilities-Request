@@ -18,7 +18,8 @@ PHP web app (platform PHP track, D-003). AGENTS.md above holds the domain rules 
 | `tools\php\php.exe tests\identity.php` (no server; the gate runs it) | `All 39 identity checks passed.` |
 | `tools\php\php.exe -d extension=pdo_pgsql tools\identity_seed.php --database test audit` (read-only) | `AUDIT OK: ...` or the count of NetIDs that need a look; `list` shows every grant |
 | `py -3 tools\offline_check.py` | `ok nothing is loaded from anywhere but this folder` |
-| `PRI Facilities Request.vbs` | the owner launches it; never launch it from a session (it starts tools/keepalive.php, which holds a LocalDB connection, or on PostgreSQL starts the drive cluster and its watcher) |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File tools\ensure-running.ps1 -Open` | `PRIOps started from this folder at http://127.0.0.1:<port>/` or `PRIOps is already running from this folder at ...`; the hidden launcher behind the desktop shortcut (open-app.vbs). Any session may run it to verify a change (owner, 2026-10-16, platform D-038). On LocalDB it starts tools/keepalive.php; on PostgreSQL, the drive cluster and its watcher |
+| `start-local.bat` | the same with a visible console, for seeing errors |
 | `STOP SERVER.bat` | the owner runs it; ends this folder's PHP server and, on PostgreSQL, stops the drive cluster unless another app is connected |
 
 ## Layout
@@ -29,10 +30,11 @@ PHP web app (platform PHP track, D-003). AGENTS.md above holds the domain rules 
 - PHP's scratch (sessions, upload temporaries) lives in `..\..\data\pri-facilities-request\runtime` through `runtime_dir()`; the launchers pass `sys_temp_dir` and `upload_tmp_dir` with `-d` because no page can set them (AGENTS.md rule 15, D-007). Backups go to `..\..\data\pri-facilities-request\backups`.
 - The ten SQL Server LocalDB databases are still on drive C:, the one thing left on the computer; moving them is owner question Q-001 in `reference\open-questions.md`.
 - `reference\` (git-ignored): specs, C3PO and GIS source data, Visual Pack, the HAR capture.
-- `intent.md`, `plan.md`, `handoff.md`, `docs/decisions.md`; agent guidance in `.claude/docs/`.
+- `intent.md`, `plan.md`, `handoff.md`, `reference/context/DECISIONS.md` (through decisions.py; `docs/decisions.md` is a pointer); agent guidance in `.claude/docs/`.
 
 ## Hard rules
 
+- Before any UI work, read `docs/design.md` (the UI Elements spec, skill drez-ui-elements) and reuse the component it names.
 - Never attach, detach, copy, start, stop or query the LocalDB databases from a prep or agent session. One exception (owner, 2026-10-11, D-012): during the PostgreSQL switch-over an agent session may read the ten registers with read-only SELECT queries through the port's loader (tools\pg\load.php), and nothing else; never write, attach, detach, back up or restart LocalDB.
 - Never write in `..\..\data\pri-facilities-request` except through the running app.
 - Never print or commit `config.php` (installer output) or `config.local.json`.
@@ -47,7 +49,7 @@ PHP web app (platform PHP track, D-003). AGENTS.md above holds the domain rules 
 - Running a PostgreSQL tool without `-d extension=pdo_pgsql`: the bundled php.ini loads only pdo_sqlsrv, and tools/php is protected, so the launchers and every PostgreSQL command pass it.
 - Naming `--database live` from a session: only the owner switch-over writes the `facilities` database; sessions use `--database test`.
 - Opening, printing or copying `pg.env`: the app reads it through `facilities/lib/pgenv.php` and nothing else does.
-- Calling `PRI Facilities Request.vbs` or `start-local.bat` to test a change.
+- Leaving a test server behind: after a verification run, stop only the `php.exe` processes whose command line names this folder (the watcher or keep-alive first, then the server), unless the server ran before the session began.
 - Reading `current_user()['Role']` as the whole story: a campus group can lend a role for the request (D-014). Ask `role_at_least()` or `user_roles()`; write `StoredRole`, never `Role`, into a user row.
 - Selecting from `work.app_groupaccess` with lower-case result names: the translator re-keys names it knows (`role` becomes `Role`). Alias every column in the spelling the code reads, as `auth_group_grants()` does.
 - Unlocking the acting-user switcher for the server: the local login refuses any proxied or remote request by design; the server sets `AUTH_MODE=proxy`.

@@ -50,7 +50,7 @@ function server_config(): array
             'username'    => server_env('SMTP_USERNAME'),
             'password'    => server_env('SMTP_PASSWORD'),
             'from'        => server_env('SMTP_FROM'),
-            'from_name'   => server_env('SMTP_FROM_NAME', 'PRI Facilities Request System'),
+            'from_name'   => server_env('SMTP_FROM_NAME', 'PRIOps (PRI Facilities)'),
             'timeout'     => (int)server_env('SMTP_TIMEOUT', '15'),
             'verify_peer' => $bool('SMTP_VERIFY_PEER', true),
         ],

@@ -41,10 +41,13 @@ ui_top('Incidents', $all ? 'Every report' : 'The reports you filed');
 ?>
 
 <div class="panel actions">
-    <a class="btn" href="new_incident.php">Report An Incident</a>
+    <a class="btn" href="new_incident.php">Report an Incident</a>
     <?php if ($all): ?>
-    <a class="btn secondary" href="incidents.php">All</a>
-    <a class="btn secondary" href="incidents.php?show=open">Still Open</a>
+    <?php /* The filter that is on says so, as the admin screen's pair does. */ ?>
+    <a class="btn secondary<?= ($_GET['show'] ?? '') !== 'open' ? ' on' : '' ?>"
+       href="incidents.php">All</a>
+    <a class="btn secondary<?= ($_GET['show'] ?? '') === 'open' ? ' on' : '' ?>"
+       href="incidents.php?show=open">Still Open</a>
     <?php endif; ?>
 </div>
 
@@ -84,7 +87,7 @@ ui_top('Incidents', $all ? 'Every report' : 'The reports you filed');
             <td><a href="incident.php?id=<?= (int)$r['IncidentID'] ?>"><?=
                 h((string)$r['TicketNumber']) ?></a></td>
             <td><?= h(picklist_label('incident_kind', (string)$r['IncidentKind'])) ?></td>
-            <td><?= h(date('j M Y', strtotime((string)$r['OccurredAt']))) ?></td>
+            <td><?= h(ui_date(strtotime((string)$r['OccurredAt']))) ?></td>
             <td><?= h($where) ?></td>
             <td class="center"><?= (int)$r['Hurt'] ?: '' ?></td>
             <td class="center"><?= (int)$r['ActionsOpen'] ?: '' ?></td>

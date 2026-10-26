@@ -55,8 +55,8 @@ $days = $plan['ReviewDueOn'] !== null
     : null;
 
 ui_top(title_case((string)$plan['Title']),
-       h((string)($plan['Reference'] ?: $plan['TicketNumber'])) . ' &middot; '
-       . h((string)$plan['TypeTitle']) . ' &middot; <a href="plans.php">the register</a>');
+       (string)($plan['Reference'] ?: $plan['TicketNumber']) . ' · ' . (string)$plan['TypeTitle'],
+       '', 'plans.php', 'the register');
 ?>
 
 <?php if ($notice): ?>
@@ -66,7 +66,7 @@ ui_top(title_case((string)$plan['Title']),
 <?php if ($days !== null && $days < 0 && $plan['Status'] === 'current'): ?>
 <div class="panel error">
     <p><strong>Overdue by <?= abs($days) ?> days.</strong> It was due on
-       <?= h(date('j F Y', strtotime((string)$plan['ReviewDueOn']))) ?>.</p>
+       <?= h(ui_date(strtotime((string)$plan['ReviewDueOn']))) ?>.</p>
 </div>
 <?php endif; ?>
 
@@ -78,12 +78,12 @@ ui_top(title_case((string)$plan['Title']),
         <div><strong>Unit</strong><br><?= h((string)($plan['UnitName']
                 ?: $plan['SurveyCode'] ?: 'not recorded')) ?></div>
         <div><strong>Effective from</strong><br><?= $plan['EffectiveOn']
-                ? h(date('j F Y', strtotime((string)$plan['EffectiveOn']))) : '&mdash;' ?></div>
+                ? h(ui_date(strtotime((string)$plan['EffectiveOn']))) : '&mdash;' ?></div>
         <div><strong>Last read</strong><br><?= $plan['LastReviewedOn']
-                ? h(date('j F Y', strtotime((string)$plan['LastReviewedOn'])))
+                ? h(ui_date(strtotime((string)$plan['LastReviewedOn'])))
                 : '<span class="muted">not since it was registered</span>' ?></div>
         <div><strong>Next due</strong><br><?= $plan['ReviewDueOn']
-                ? h(date('j F Y', strtotime((string)$plan['ReviewDueOn']))) : '&mdash;' ?></div>
+                ? h(ui_date(strtotime((string)$plan['ReviewDueOn']))) : '&mdash;' ?></div>
         <div><strong>Status</strong><br><?= h(nice_code((string)$plan['Status'])) ?>
             <?= $plan['Version'] ? '<span class="muted"> &middot; version '
                                    . h((string)$plan['Version']) . '</span>' : '' ?></div>
@@ -122,9 +122,9 @@ ui_top(title_case((string)$plan['Title']),
                 <option value="<?= h($c) ?>"><?= h($l) ?></option>
                 <?php endforeach; ?>
             </select></label>
-        <label style="grid-column:2/-1">Note
+        <label class="span-rest">Note
             <input name="note" placeholder="What changed, or that nothing did"></label>
-        <p style="grid-column:1/-1"><button class="btn">Record It</button></p>
+        <p class="span-all"><button class="btn">Record It</button></p>
     </form>
 </div>
 <?php endif; ?>
@@ -133,17 +133,17 @@ ui_top(title_case((string)$plan['Title']),
     <h2>Reviews</h2>
     <?php if (!$plan['reviews']): ?>
     <p class="muted">Never reviewed. It was registered on
-       <?= h(date('j F Y', strtotime((string)$plan['CreatedAt']))) ?>.</p>
+       <?= h(ui_date(strtotime((string)$plan['CreatedAt']))) ?>.</p>
     <?php else: ?>
     <table>
         <tr><th>Date</th><th>By</th><th>Outcome</th><th>Note</th><th>Next due</th></tr>
         <?php foreach ($plan['reviews'] as $r): ?>
         <tr>
-            <td><?= h(date('j M Y', strtotime((string)$r['ReviewedOn']))) ?></td>
+            <td><?= h(ui_date(strtotime((string)$r['ReviewedOn']))) ?></td>
             <td><?= h((string)($r['ReviewedByName'] ?: $r['ReviewedByNetID'])) ?></td>
             <td><?= h(picklist_label('plan_review_outcome', (string)$r['Outcome'])) ?></td>
             <td><?= h((string)$r['Note']) ?></td>
-            <td><?= $r['NextDueOn'] ? h(date('j M Y', strtotime((string)$r['NextDueOn']))) : '' ?></td>
+            <td><?= $r['NextDueOn'] ? h(ui_date(strtotime((string)$r['NextDueOn']))) : '' ?></td>
         </tr>
         <?php endforeach; ?>
     </table>

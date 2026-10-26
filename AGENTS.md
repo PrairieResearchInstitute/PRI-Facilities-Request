@@ -79,8 +79,8 @@ something took a day to work out, and several were learned twice.
    user's applications, mid-work. Step to the next free port.
 
 8. **The launcher is not optional.** This is PHP: it must be executed by a
-   server, so it cannot be opened as a file. `PRI Facilities Request.vbs`
-   starts the server and opens the browser. `start-local.bat` is the same
+   server, so it cannot be opened as a file. `tools\ensure-running.ps1 -Open`
+   (behind the desktop shortcut, hidden) starts the server and opens the browser. `start-local.bat` is the same
    thing with a console, for seeing errors.
 
 9. **Never hand-edit `config.php`.** The application writes it. Change
@@ -139,7 +139,7 @@ something took a day to work out, and several were learned twice.
 
 ```bat
 rem run it
-"PRI Facilities Request.vbs"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\ensure-running.ps1 -Open
 
 rem run it with a console, to see errors
 start-local.bat

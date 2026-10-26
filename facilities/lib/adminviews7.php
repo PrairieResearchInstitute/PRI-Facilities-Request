@@ -241,7 +241,7 @@ function av_purchase_actions(array $req): void
     }
 
     // 1. Move it along.
-    echo '<h3>Move it along</h3>';
+    echo '<h3>Move It Along</h3>';
     echo '<div class="grid">';
     if (in_array($req['Status'], ['approved', 'ordered'], true)) {
         echo '<form method="post">' . csrf_field()
@@ -249,7 +249,7 @@ function av_purchase_actions(array $req): void
            . '<input type="hidden" name="pr_id" value="' . $id . '">'
            . '<label>Order or requisition reference <input name="order_reference" value="'
            . h((string)$req['OrderReference']) . '" placeholder="PO or I-Buy number"></label>'
-           . '<div class="actions"><button class="primary">Record the order</button></div>'
+           . '<div class="actions"><button class="primary">Record the Order</button></div>'
            . '</form>';
     }
     if (in_array($req['Status'], ['ordered', 'approved'], true)) {
@@ -258,7 +258,7 @@ function av_purchase_actions(array $req): void
            . '<input type="hidden" name="pr_id" value="' . $id . '">'
            . '<input type="hidden" name="to" value="received">'
            . '<label>Note <input name="note" placeholder="who signed for it"></label>'
-           . '<div class="actions"><button>Everything has arrived</button></div>'
+           . '<div class="actions"><button>Everything Has Arrived</button></div>'
            . '</form>';
     }
     if (!in_array($req['Status'], ['closed', 'denied'], true)) {
@@ -267,34 +267,34 @@ function av_purchase_actions(array $req): void
            . '<input type="hidden" name="pr_id" value="' . $id . '">'
            . '<input type="hidden" name="to" value="closed">'
            . '<label>Note <input name="note" placeholder="why it is finished"></label>'
-           . '<div class="actions"><button>Close it</button></div>'
+           . '<div class="actions"><button>Close It</button></div>'
            . '</form>';
         echo '<form method="post">' . csrf_field()
            . '<input type="hidden" name="action" value="pur_status">'
            . '<input type="hidden" name="pr_id" value="' . $id . '">'
            . '<input type="hidden" name="to" value="denied">'
            . '<label>Why <input name="note" required placeholder="required"></label>'
-           . '<div class="actions"><button class="danger">Cancel it</button></div>'
+           . '<div class="actions"><button class="danger">Cancel It</button></div>'
            . '</form>';
     }
     echo '</div>';
 
     // 2. Nudge, when it is only waiting on somebody reading their email.
     if (in_array($req['Status'], ['submitted', 'fund_review', 'finance_review'], true)) {
-        echo '<h3>Nobody has answered</h3>';
+        echo '<h3>Nobody Has Answered</h3>';
         echo '<p class="muted">Sends the same notice again to whoever is still being waited on. '
            . 'It does not change anything.</p>';
         echo '<form method="post">' . csrf_field()
            . '<input type="hidden" name="action" value="pur_nudge">'
            . '<input type="hidden" name="pr_id" value="' . $id . '">'
-           . '<div class="actions"><button>Ask them again</button></div></form>';
+           . '<div class="actions"><button>Ask Them Again</button></div></form>';
     }
 
     // 3. Repair the seats. This is the part that actually unsticks things.
     $repairable = array_values(array_filter($funds, fn($f) =>
         $f['PiStatus'] === 'pending' || $f['FmStatus'] === 'pending'));
     if ($repairable) {
-        echo '<h3>Who is being waited on</h3>';
+        echo '<h3>Who Is Being Waited On</h3>';
         echo '<p class="muted">Where the directory has no NetID, or the person has left, put the '
            . 'right one in. Changing it re-asks that seat. Recording a decision on somebody&rsquo;s '
            . 'behalf is written down as exactly that, with your name on it.</p>';

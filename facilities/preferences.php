@@ -36,7 +36,7 @@ $pref = digest_prefs((string)$user['NetID']);
 $items = digest_items($user, (bool)$pref['IncludeMine']);
 $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-ui_top('Your preferences', '<a href="index.php">&larr; home</a>');
+ui_top('Your Preferences', '', '', 'index.php', 'home');
 flash_show();
 ?>
 <div class="panel">
@@ -73,14 +73,14 @@ flash_show();
                 <?php endfor; ?>
             </select>
         </label>
-        <label class="check" style="align-self:end">
+        <label class="check end">
             <input type="checkbox" name="include_mine" value="1"
                 <?= $pref['IncludeMine'] ? 'checked' : '' ?>>
             Include my own open requests
         </label>
-        <div class="actions" style="grid-column:1/-1">
+        <div class="actions span-all">
             <button name="action" value="save" class="primary">Save</button>
-            <button name="action" value="send_now">Send me one now</button>
+            <button name="action" value="send_now">Send Me One Now</button>
         </div>
     </form>
 

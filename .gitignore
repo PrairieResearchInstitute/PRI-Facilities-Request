@@ -104,3 +104,5 @@ sql/28_purchase_fixes.sql
 # Browser network capture of the internal site. Captures carry session
 # cookies and authorisation headers, and it is not source.
 *.har
+CLAUDE.local.md
+docs/handoffs/

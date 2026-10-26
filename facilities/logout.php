@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/lib/csrf.php';
 require_once __DIR__ . '/lib/identity.php';
+require_once __DIR__ . '/lib/ui.php';   // for ui_brand_mark(), not the chrome
 
 app_session_start();
 $_SESSION = [];
@@ -30,11 +31,18 @@ if ($auth['AUTH_MODE'] === 'proxy' && $auth['AUTH_LOGOUT_URL'] !== '') {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Signed out - PRI Facilities Request System</title>
+<title>Signed out - PRIOps</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-<header class="site"><h1>Signed out</h1></header>
+<?php
+// The lockup, not the chrome. ui_top() would print the navigation and the
+// acting-user line, which is exactly what a signed-out page must not show,
+// so this page carries the brand mark alone (PFR-13).
+?>
+<header class="site"><div class="bar"><div><?= ui_brand_mark(44) ?><h1>Signed out</h1></div></div></header>
 <main>
     <div class="panel">
         <p>Your application session has ended. To sign out of the campus single sign-on

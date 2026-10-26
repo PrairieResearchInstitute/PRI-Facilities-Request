@@ -16,7 +16,7 @@
     "On a computer with no config.php, browse to install.php after the first start; the installer writes config.php and then refuses to run again."
   ],
   "run": [
-    "Double-click PRI Facilities Request.vbs. The local server starts and the browser opens on the application.",
+    "Double-click the PRI Facilities Request desktop shortcut. It runs tools\\ensure-running.ps1 -Open with no window: the local server starts, or the one already serving this folder is reused, and the browser opens on the application.",
     "start-local.bat does the same with a visible console for troubleshooting."
   ],
   "settings": [

@@ -25,7 +25,7 @@ $types = [
     'key'   => 'Key request',
 ];
 
-ui_top('How requests move', '<a href="index.php">&larr; home</a>');
+ui_top('How Requests Move', '', '', 'index.php', 'home');
 ?>
 <div class="panel">
     <p>Every request walks these stages. Whoever filed it is emailed each time it moves, and again

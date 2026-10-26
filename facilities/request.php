@@ -29,7 +29,7 @@ $id = (int)($_GET['id'] ?? 0);
 $req = rq_get($type, $id);
 if (!$req) {
     http_response_code(404);
-    ui_top('Not found');
+    ui_top('Not Found');
     echo '<div class="panel err"><p>No such request.</p><p><a href="index.php">Home</a></p></div>';
     ui_bottom();
     exit;
@@ -68,7 +68,7 @@ $isMine = $req['RequestedByNetID'] === $user['NetID'];
 if (!may_see_all_requests($user)
     && strcasecmp((string)($req['RequestedByNetID'] ?? ''), (string)$user['NetID']) !== 0) {
     http_response_code(403);
-    ui_top('Not yours');
+    ui_top('Not Yours');
     echo '<div class="panel err"><p>That request was filed by somebody else. You can see the '
        . 'ones you filed on <a href="board.php">Open Requests</a>.</p></div>';
     ui_bottom();
@@ -76,7 +76,7 @@ if (!may_see_all_requests($user)
 }
 
 $titles = ['space' => 'Space Request', 'key' => 'Key Request'];
-ui_top($req['TicketNumber'] . ' — ' . $titles[$type], '<a href="index.php">&larr; home</a>');
+ui_top($req['TicketNumber'] . ' — ' . $titles[$type], '', '', 'index.php', 'home');
 flash_show();
 ?>
 <div class="panel">
@@ -188,7 +188,7 @@ flash_show();
                 <button name="action" value="decide" class="primary"
                         onclick="this.form.decision.value='approved'">Approve</button>
                 <button name="action" value="decide"
-                        onclick="this.form.decision.value='returned'">Return to submitter</button>
+                        onclick="this.form.decision.value='returned'">Return to Submitter</button>
                 <button name="action" value="decide"
                         onclick="this.form.decision.value='denied'">Deny</button>
                 <input type="hidden" name="decision" value="approved">
@@ -211,7 +211,7 @@ flash_show();
         <?= csrf_field() ?>
         <label>Room being assigned
             <select name="room_code" required>
-                <option value="">--Select Room--</option>
+                <option value="">Choose a room</option>
                 <?php
                 $rooms = db('space')->prepare(
                     'SELECT RoomCode, BldgNumber, FloorCode, RoomID, RoomName FROM gis.Rooms
@@ -226,12 +226,12 @@ flash_show();
             </select>
         </label>
         <label>Principal investigator <input name="pi_name"></label>
-        <label class="check" style="align-self:end">
+        <label class="check end">
             <input type="checkbox" name="assign_occupant" value="1" checked>
             Also record the requester as an occupant</label>
-        <label style="grid-column:1/-1">Note <input name="notes"></label>
-        <div class="actions" style="grid-column:1/-1">
-            <button name="action" value="assign" class="primary">Assign the room</button>
+        <label class="span-all">Note <input name="notes"></label>
+        <div class="actions span-all">
+            <button name="action" value="assign" class="primary">Assign the Room</button>
         </div>
     </form>
     <?php else: ?>
@@ -240,7 +240,7 @@ flash_show();
     <form method="post" class="filters">
         <?= csrf_field() ?>
         <label>Key number <input name="key_code" required></label>
-        <button name="action" value="issue" class="primary">Issue and record</button>
+        <button name="action" value="issue" class="primary">Issue and Record</button>
     </form>
     <?php endif; ?>
 </div>
@@ -251,7 +251,7 @@ flash_show();
     <form method="post" class="filters">
         <?= csrf_field() ?>
         <label>Closing note <input name="comment" size="34"></label>
-        <button name="action" value="close">Close this request</button>
+        <button name="action" value="close">Close This Request</button>
     </form>
 </div>
 <?php endif; ?>

@@ -88,7 +88,7 @@ function av_datafeeds(): void
             <?= csrf_field() ?>
             <label>Exports <input type="file" name="files[]" accept=".csv,.txt,.xlsx" multiple required></label>
             <div class="actions">
-                <button name="action" value="ds_upload" class="primary">Load these</button>
+                <button name="action" value="ds_upload" class="primary">Load These</button>
             </div>
         </form>
     </div>
@@ -103,7 +103,7 @@ function av_datafeeds(): void
         <p><strong>Unattended loading is off.</strong> No key exists, so
            <code>api/ingest.php</code> refuses every post.</p>
         <form method="post"><?= csrf_field() ?>
-            <button name="action" value="ds_token_new" class="primary">Generate a key</button>
+            <button name="action" value="ds_token_new" class="primary">Generate a Key</button>
         </form>
         <?php else: ?>
         <p>Key: <code><?= h($token) ?></code></p>
@@ -114,10 +114,12 @@ function av_datafeeds(): void
         <pre class="snippet">powershell -ExecutionPolicy Bypass -File "<?= h('tools\\pri-refresh.ps1') ?>" `
    -Server "<?= h($base . dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/admin.php'))) ?>" `
    -Token  "<?= h($token) ?>"</pre>
-        <form method="post" onsubmit="return confirm('Clear the key? Any scheduled task using it will stop working.')">
+        <form method="post"
+              data-confirm="Clear the key? Any scheduled task using it will stop working."
+              data-confirm-title="Clear the Key" data-confirm-ok="Clear Key" data-confirm-danger>
             <?= csrf_field() ?>
-            <button name="action" value="ds_token_new">Replace the key</button>
-            <button name="action" value="ds_token_clear" class="danger">Turn unattended loading off</button>
+            <button name="action" value="ds_token_new">Replace the Key</button>
+            <button name="action" value="ds_token_clear" class="danger">Turn Unattended Loading Off</button>
         </form>
         <?php endif; ?>
     </div>
@@ -147,7 +149,7 @@ function av_datafeeds(): void
         <form method="post">
             <?= csrf_field() ?>
             <div class="actions">
-                <button name="action" value="gis_load" class="primary">Load space and property data</button>
+                <button name="action" value="gis_load" class="primary">Load Space and Property Data</button>
             </div>
         </form>
     </div>
@@ -178,7 +180,7 @@ function av_datafeeds(): void
                     placeholder="Assignee&#9;Emp Status&#9;Survey&#9;State&#9;Building&#9;Floor&#9;Room&#9;Key #&#9;Type&#9;Qty&#9;Assigned By&#9;Comments&#9;Assigned On"></textarea>
             </label>
             <div class="actions">
-                <button name="action" value="keys_paste" class="primary">Load pasted keys</button>
+                <button name="action" value="keys_paste" class="primary">Load Pasted Keys</button>
             </div>
         </form>
     </div>

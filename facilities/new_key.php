@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ui_top('Key Request', '<a href="index.php">&larr; request types</a>');
+ui_top('Key Request', '', '', 'index.php', 'request types');
 flash_show();
 ?>
 <div class="panel">
@@ -128,7 +128,7 @@ flash_show();
         </label>
         <label>Employment status
             <select name="emp_status">
-                <option value="">--</option>
+                <option value="">Choose one</option>
                 <?php foreach (['Active', 'Student', 'Visitor', 'Retired'] as $s): ?>
                 <option <?= ($_POST['emp_status'] ?? '') === $s ? 'selected' : '' ?>><?= h($s) ?></option>
                 <?php endforeach; ?>
@@ -159,7 +159,7 @@ flash_show();
     <div class="grid">
         <label>Building
             <select name="bldg" data-loc-building required>
-                <option value="">--Select Building--</option>
+                <option value="">Choose a building</option>
                 <?php foreach ($buildings as $b): ?>
                 <option value="<?= h((string)$b['BldgNumber']) ?>" data-bldg="<?= h((string)$b['BldgNumber']) ?>"
                     <?= (string)$b['BldgNumber'] === (string)($_POST['bldg'] ?? '') ? 'selected' : '' ?>>
@@ -167,14 +167,14 @@ flash_show();
                 <?php endforeach; ?>
             </select>
         </label>
-        <label>Floor <select name="floor" data-loc-floor disabled><option value="">--</option></select></label>
+        <label>Floor <select name="floor" data-loc-floor disabled><option value="">Choose one</option></select></label>
         <label>Room
             <select name="room" data-loc-room data-initial="<?= h((string)($_POST['room'] ?? '')) ?>">
-                <option value="">--Select a building first--</option>
+                <option value="">Choose a building first</option>
             </select>
         </label>
         <input type="hidden" data-loc-code>
-        <p class="muted" data-loc-note style="grid-column:1/-1" hidden></p>
+        <p class="muted" data-loc-note class="span-all" hidden></p>
     </div>
 
     <h2>3. Why</h2>
@@ -184,8 +184,7 @@ flash_show();
     </label>
 
     <div class="actions">
-        <button class="primary">Submit key request</button>
+        <button class="primary">Submit Key Request</button>
     </div>
 </form>
-<script src="assets/location.js"></script>
-<?php ui_bottom(); ?>
+<?php ui_bottom(['location.js']); ?>

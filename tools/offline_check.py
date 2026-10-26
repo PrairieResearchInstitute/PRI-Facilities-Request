@@ -19,7 +19,7 @@ What it refuses:
                  or url() to one, or any named CDN
   remote fetch   fetch()/XHR to an absolute URL rather than a relative
                  path under the app
-  web font       @font-face or a font served from anywhere but the disk
+  web font       a @font-face whose src leaves this folder
   render call    the server reaching out mid-request - file_get_contents
                  on a URL, curl, fsockopen
 
@@ -57,7 +57,10 @@ RULES = [
     (r'(?:src|href)\s*=\s*["\'](?:https?:)?//', 'asset loaded from another host'),
     (r'@import[^;]*(?:https?:)?//',             'stylesheet imported from another host'),
     (r'url\(\s*["\']?(?:https?:)?//',           'CSS url() pointing at another host'),
-    (r'@font-face',                             'web font - the deck and app use system fonts'),
+    # No rule of its own for @font-face: the owner's answer to Q-017 (17 Oct
+    # 2026) put the campus faces in assets/fonts, carried rather than fetched,
+    # and a face that reached another host would be caught by the url() rule
+    # above. Flagging every @font-face would now fail on our own files.
     (r'fonts\.googleapis|fonts\.gstatic|jsdelivr|unpkg|cdnjs|bootstrapcdn|ajax\.googleapis|code\.jquery',
                                                 'a CDN'),
     (r'(?:fetch|\.open)\s*\(\s*["\'`](?:https?:)?//', 'fetch/XHR to an absolute URL'),

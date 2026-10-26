@@ -43,7 +43,7 @@ $surveys = db('fleet')->query(
     "SELECT DISTINCT SurveyCode FROM ref.FleetVehicles
       WHERE IsActive = 1 AND ISNULL(SurveyCode,'') <> '' ORDER BY SurveyCode")->fetchAll();
 
-ui_top('Vehicle Stickers', '<a href="admin.php?section=mileage">&larr; mileage</a>');
+ui_top('Vehicle Stickers', '', '', 'admin.php?section=mileage', 'mileage');
 ?>
 <div class="panel noprint">
     <h2>Vehicle Stickers</h2>
@@ -76,7 +76,7 @@ ui_top('Vehicle Stickers', '<a href="admin.php?section=mileage">&larr; mileage</
         <a href="stickers.php">Clear</a>
     </form>
     <p><strong><?= count($vehicles) ?></strong> label<?= count($vehicles) === 1 ? '' : 's' ?>.
-       <button type="button" onclick="window.print()">Print them</button></p>
+       <button type="button" onclick="window.print()">Print Them</button></p>
 </div>
 
 <?php if (!$vehicles): ?>

@@ -210,7 +210,7 @@ function rq_notify_submitter(string $type, int $id, string $ticket, string $neti
     $page = in_array($type, ['space', 'key'], true)
         ? 'request.php?type=' . $type . '&id=' . $id
         : 'detail.php?type=' . $type . '&id=' . $id;
-    $subject = $ticket . ' is now ' . ($labels[$to]['Label'] ?? $to);
+    $subject = 'PRIOps: ' . $ticket . ' is now ' . ($labels[$to]['Label'] ?? $to);
     $body = 'Your request ' . $ticket . " has moved on.\n\n"
           . 'From: ' . ($labels[$from]['Label'] ?? $from) . "\n"
           . 'To: '   . ($labels[$to]['Label'] ?? $to) . "\n"

@@ -38,7 +38,7 @@ function av_mileage(): void
            . '<span class="statl">' . h($label) . '</span></span>';
     }
     echo '</div>';
-    echo '<p><a class="btn primary" href="stickers.php">Print the vehicle stickers</a> '
+    echo '<p><a class="btn primary" href="stickers.php">Print the Vehicle Stickers</a> '
        . '<span class="muted">one per cab; scanning it opens that vehicle&rsquo;s page</span></p>';
 
     // Whether the suggestion is worth offering, which is a question only

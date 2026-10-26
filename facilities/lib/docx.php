@@ -192,8 +192,8 @@ function docx_build(string $title, string $body): string
       . 'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
       . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
       . '<dc:title>' . docx_esc($title) . '</dc:title>'
-      . '<dc:creator>PRI Facilities Request System</dc:creator>'
-      . '<cp:lastModifiedBy>PRI Facilities Request System</cp:lastModifiedBy>'
+      . '<dc:creator>PRIOps</dc:creator>'
+      . '<cp:lastModifiedBy>PRIOps</cp:lastModifiedBy>'
       . '<dcterms:created xsi:type="dcterms:W3CDTF">' . date('c') . '</dcterms:created>'
       . '<dcterms:modified xsi:type="dcterms:W3CDTF">' . date('c') . '</dcterms:modified>'
       . '</cp:coreProperties>';

@@ -59,7 +59,7 @@ function work_qs(array $overrides): string
     return h('?' . http_build_query(array_merge($_GET, $overrides)));
 }
 
-ui_top('My work', 'for ' . h((string)$user['DisplayName']));
+ui_top('My Work', 'for ' . h((string)$user['DisplayName']));
 flash_show();
 ?>
 <?php if ($viaToken && $user['NetID'] !== current_user()['NetID']): ?>
@@ -103,7 +103,7 @@ flash_show();
     <table>
         <tr><th>Ticket</th><th>Kind</th><th>Stage</th><th>What</th><th>Filed by</th><th>Waiting</th><th></th></tr>
         <?php foreach ($items['decisions'] as $d): $days = dash_days_since($d['since']); ?>
-        <tr class="rowlink" onclick="location='<?= h($d['url']) ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='<?= h($d['url']) ?>'">
             <td><a href="<?= h($d['url']) ?>"><?= h($d['ticket']) ?></a></td>
             <td><?= h($d['kind']) ?></td>
             <td><strong><?= h($d['stage']) ?></strong></td>
@@ -134,7 +134,7 @@ flash_show();
         <?php foreach (array_slice($items['queue'], 0, 60) as $q):
             $flow = status_labels($q['type']);
             $days = dash_days_since($q['since']); ?>
-        <tr class="rowlink" onclick="location='<?= h($q['url']) ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='<?= h($q['url']) ?>'">
             <td><a href="<?= h($q['url']) ?>"><?= h($q['ticket']) ?></a></td>
             <td><?= h($q['kind']) ?></td>
             <td><?= h($q['summary']) ?></td>
@@ -163,7 +163,7 @@ flash_show();
     <table>
         <tr><th>Ticket</th><th>Kind</th><th>What</th><th>Stage</th><th>Filed</th></tr>
         <?php foreach ($items['mine'] as $m): $flow = status_labels($m['type']); ?>
-        <tr class="rowlink" onclick="location='<?= h($m['url']) ?>'">
+        <tr class="rowlink" onclick="if(window.getSelection().toString()||event.target.closest('a,button,input,label'))return;location='<?= h($m['url']) ?>'">
             <td><a href="<?= h($m['url']) ?>"><?= h($m['ticket']) ?></a></td>
             <td><?= h($m['kind']) ?></td>
             <td><?= h($m['summary']) ?></td>

@@ -79,7 +79,7 @@ function mapview_render(): void
     <div class="panel">
         <h2>Building map
             <a class="btn" style="float:right;font-size:0.8rem"
-               href="admin.php?section=map&amp;panel=data">Data sources and keys</a></h2>
+               href="admin.php?section=map&amp;panel=data">Data Sources and Keys</a></h2>
         <form method="get" class="filters">
             <input type="hidden" name="section" value="map">
             <label>Building
@@ -137,7 +137,12 @@ function mapview_render(): void
             </div>
         </div>
     </div>
-    <script src="assets/map.js"></script>
+    <?php
+    // The plan's own script, asked for rather than printed here: a script
+    // inside main is a script inside the content (PFR-22). ui_bottom()
+    // sends it after the footer, on whichever page drew the plan.
+    ui_script('map.js');
+    ?>
     <?php
     // A capture view for the briefing deck: ?present=plan strips the
     // page down to the floor plan alone; ?present=room shows the whole

@@ -39,7 +39,8 @@ if exist "%~dp0..\..\data\pri-facilities-request\storage\" (
 )
 
 echo.
-echo Setup complete. Start the app with "PRI Facilities Request.vbs".
+echo Setup complete. Start the app from its desktop shortcut, which runs
+echo tools\ensure-running.ps1 -Open, or with start-local.bat to see a console.
 echo.
 pause
 endlocal

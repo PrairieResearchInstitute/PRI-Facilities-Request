@@ -183,14 +183,14 @@ function av_property_one(array $r, bool $may): void
            . '<input type="hidden" name="action" value="property_apply">'
            . '<input type="hidden" name="pu_id" value="' . (int)$r['PropertyUpdateID'] . '">'
            . '<label>Note <input name="note" placeholder="optional"></label>'
-           . '<div class="actions"><button class="primary">Apply it to the inventory</button></div>'
+           . '<div class="actions"><button class="primary">Apply It to the Inventory</button></div>'
            . '</form>';
         echo '<form method="post">' . csrf_field()
            . '<input type="hidden" name="action" value="property_decline">'
            . '<input type="hidden" name="pu_id" value="' . (int)$r['PropertyUpdateID'] . '">'
            . '<label>Why not <input name="note" required '
            . 'placeholder="so they know what to do instead"></label>'
-           . '<div class="actions"><button class="danger">Decline it</button></div>'
+           . '<div class="actions"><button class="danger">Decline It</button></div>'
            . '</form>';
         echo '</div>';
     }

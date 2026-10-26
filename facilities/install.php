@@ -33,7 +33,7 @@ if (app_installed()) {
 if (db_engine() === 'postgres') {
     http_response_code(403);
     page_top('Installer not used on PostgreSQL');
-    echo '<div class="panel err"><h2>Not used on PostgreSQL</h2>'
+    echo '<div class="panel err"><h2>Not Used on PostgreSQL</h2>'
        . '<p>dataMode is postgres. This page builds SQL Server databases; on PostgreSQL the schema '
        . 'comes from tools/pg/migrate.php and the data from tools/pg/load.php or tools/pg/seed.php.</p></div>';
     page_bottom();
@@ -314,10 +314,11 @@ function page_top(string $title): void
 {
     echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
-       . '<title>' . h($title) . ' - PRI Facilities Request System</title>'
+       . '<title>' . h($title) . ' - PRIOps</title>'
        . '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">'
+       . '<link rel="icon" href="assets/favicon.ico" sizes="any">'
        . '<link rel="stylesheet" href="assets/app.css"></head><body>'
-       . '<header class="site"><h1>PRI Facilities Request System</h1>'
+       . '<header class="site"><h1>PRIOps</h1>'
        . '<p class="sub">Prairie Research Institute, University of Illinois Urbana-Champaign</p></header>'
        . '<main>';
 }
@@ -338,7 +339,7 @@ if ($installReport !== null && $installReport['status'] === 'ok') {
         }
         echo '</ul>';
     }
-    echo '<h3>Seeded reference data</h3><table><tr><th>Table</th>';
+    echo '<h3>Seeded Reference Data</h3><table><tr><th>Table</th>';
     foreach (APP_DB_NAMES as $n) {
         echo '<th>' . h(APP_DB_LABELS[$n]) . '</th>';
     }
@@ -353,13 +354,13 @@ if ($installReport !== null && $installReport['status'] === 'ok') {
         echo '</tr>';
     }
     echo '</table>';
-    echo '<h3>Data gaps requiring attention</h3><ul class="flags">';
+    echo '<h3>Data Gaps Requiring Attention</h3><ul class="flags">';
     foreach ($installReport['flags'] as $flag) {
         echo '<li>' . h($flag) . '</li>';
     }
     echo '</ul>';
     echo '<p>config.php has been written and this installer is now disabled.</p>';
-    echo '<p><a class="btn" href="index.php">Open the application</a></p></div>';
+    echo '<p><a class="btn" href="index.php">Open the Application</a></p></div>';
     page_bottom();
     exit;
 }
@@ -423,7 +424,7 @@ echo '<label class="check"><input type="checkbox" name="create_db" value="1"'
 echo '</fieldset>';
 
 echo '<div class="actions">'
-   . '<button name="action" value="test">Test connections</button> '
+   . '<button name="action" value="test">Test Connections</button> '
    . '<button name="action" value="install" class="primary">Install</button>'
    . '</div></form></div>';
 

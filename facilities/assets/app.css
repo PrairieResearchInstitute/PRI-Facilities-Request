@@ -1,22 +1,118 @@
 /* PRI Facilities Request System — served locally, no CDN (spec Section 4).
    Mobile first: most reports originate from a phone in front of the problem. */
 
+/* Tokens: docs/design.md section 2. Every colour, face and measure the
+   pages share is named here. Several were used as var() before they were
+   defined, so the browser fell back to the second argument or to nothing
+   at all (PFR-10), and one priority colour was never written down, which
+   showed white text on white (PFR-04). */
+/* The campus faces, carried in this folder and never fetched (Q-017).
+   Source Sans 3 is the current name of the Source Sans the Illinois Web
+   Toolkit asks for; the stack names all three spellings so it matches
+   whichever a campus stylesheet declares. font-display: swap so text is
+   readable from the first paint. */
+@font-face {
+    font-family: "Source Sans 3";
+    src: url("fonts/source-sans-3-400.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: "Source Sans 3";
+    src: url("fonts/source-sans-3-400-italic.woff2") format("woff2");
+    font-weight: 400; font-style: italic; font-display: swap;
+}
+@font-face {
+    font-family: "Source Sans 3";
+    src: url("fonts/source-sans-3-600.woff2") format("woff2");
+    font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: "Source Sans 3";
+    src: url("fonts/source-sans-3-700.woff2") format("woff2");
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: "Montserrat";
+    src: url("fonts/montserrat-600.woff2") format("woff2");
+    font-weight: 600; font-style: normal; font-display: swap;
+}
+
 :root {
-    --ink: #1a1a1a;
-    --paper: #f5f4f1;
+    /* Ground and surface: the cool set (Q-019, owner 17 Oct 2026). The
+       warm paper and warm lines this app used, #f5f4f1 and #d8d5cf, are
+       gone. --warm stays warm on purpose: it marks guidance, not a
+       neutral surface. */
+    --paper: #f4f6f8;
     --panel: #ffffff;
-    --line: #d8d5cf;
-    --accent: #13294b;   /* Illinois blue */
-    --accent2: #e84a27;  /* Illinois orange */
+    --subtle: #fafbfc;
+    --fill: #e3e6ea;
+    --hover: #eceff3;
+    --warm: #fff5ea;
+    --shade: var(--hover);
+
+    /* Line and text */
+    --line: #e3e3e2;
+    --ink: #1a1a1a;
+    --muted: #666;
+
+    /* Brand. Illinois Orange replaced #e84a27 on 17 Oct 2026 (Q-26).
+       White text never sits on --accent2: --il-altgeld is the darker
+       orange that carries white text and reads as text on light grounds. */
+    --accent: #13294b;        /* Illinois Blue */
+    --navy: var(--accent);
+    --accent2: #FF5F05;       /* Illinois Orange */
+    --il-altgeld: #C84113;
+    --on-accent: #ffffff;
+
+    /* The one keyboard focus ring (PFR-38) */
+    --focus: 3px solid var(--il-altgeld);
+
+    /* Elevation and layers */
+    --shadow-1: 0 2px 8px rgba(19, 41, 75, .25);
+    --z-dialog: 50;
+
+    /* Status. The warn pair came from the Studio, which was the only place
+       that had one. The values are unchanged and measured: 6.80 to 1, so
+       the text carries on its own ground (PFR-11). */
     --good: #1b6b2f;
     --bad: #a4210c;
+    --warn-bg: #fdece7;
+    --warn-text: #8a3a12;
+
+    /* Priority bands */
+    --band-critical: #a4210c;
+    --band-high: #c25400;
+    --band-elevated: #8a6d00;
+    --band-routine: #4a5a6a;
+    --band-low: #4f6f5a;
+
+    /* Shape (PFR-25) */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-pill: 10px;
+
+    /* Type (PFR-26, PFR-30). The scale covers the sizes the pages share;
+       the wordmark, the stat figure and the printed label sheet sit
+       outside it on purpose. */
+    --font: "Source Sans 3", "Source Sans Pro", "Source Sans", Arial, sans-serif;
+    --font-heading: "Montserrat", "Source Sans 3", Arial, sans-serif;
+    --mono: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.85rem;
+    --fs-md: 0.9rem;
+    --fs-lg: 1.15rem;
+    --fs-xl: 1.3rem;
+    /* The wordmark keeps Arial 800, an exception to Q-017 (owner,
+       17 Oct 2026): Montserrat is carried at 600 only, so PRIOps beside
+       the lanternfly rendered as a faked bold and read thin. */
+    --brand-font: Arial, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
     margin: 0;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font);
     color: var(--ink);
     background: var(--paper);
     line-height: 1.45;
@@ -28,8 +124,8 @@ header.site {
     padding: 0.9rem 1.25rem;
     border-bottom: 4px solid var(--accent2);
 }
-header.site h1 { margin: 0; font-size: 1.3rem; }
-header.site .sub { margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.85; }
+header.site h1 { margin: 0; font-size: var(--fs-xl); }
+header.site .sub { margin: 0.25rem 0 0; font-size: var(--fs-sm); opacity: 0.85; }
 header.site a { color: #cfd8ea; }
 
 header.site .bar {
@@ -38,28 +134,28 @@ header.site .bar {
     justify-content: space-between;
     align-items: baseline;
     gap: 0.5rem;
-    max-width: 72rem;
+    max-width: var(--page-w);
     margin: 0 auto;
 }
 nav.mainnav a {
     color: #fff;
     text-decoration: none;
     margin-left: 1rem;
-    font-size: 0.95rem;
+    font-size: var(--fs-md);
     border-bottom: 2px solid transparent;
 }
 nav.mainnav a:hover { border-bottom-color: var(--accent2); }
 
 form.devswitch {
-    max-width: 72rem;
+    max-width: var(--page-w);
     margin: 0.4rem auto 0;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     opacity: 0.9;
 }
 form.devswitch select {
     display: inline;
     width: auto;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     padding: 0.15rem;
     margin-left: 0.3rem;
 }
@@ -67,15 +163,18 @@ form.devswitch select {
 .band {
     display: inline-block;
     padding: 0.1rem 0.5rem;
-    border-radius: 10px;
-    font-size: 0.78rem;
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-xs);
     font-weight: bold;
     color: #fff;
 }
-.band-critical { background: #a4210c; }
-.band-high     { background: #c25400; }
-.band-elevated { background: #8a6d00; }
-.band-routine  { background: #4a5a6a; }
+.band-critical { background: var(--band-critical); }
+.band-high     { background: var(--band-high); }
+.band-elevated { background: var(--band-elevated); }
+.band-routine  { background: var(--band-routine); }
+/* The purchase pages mark a settled purchase band-low. The class was never
+   defined, so those pills were white text on the panel's white (PFR-04). */
+.band-low      { background: var(--band-low); }
 
 .tabs { margin: 0 0 1rem; }
 .tabs a {
@@ -83,8 +182,8 @@ form.devswitch select {
     padding: 0.45rem 1rem;
     border: 1px solid var(--line);
     border-bottom: none;
-    border-radius: 6px 6px 0 0;
-    background: #eceae5;
+    border-radius: var(--radius-md) 6px 0 0;
+    background: var(--fill);
     color: var(--ink);
     text-decoration: none;
     margin-right: 0.25rem;
@@ -102,31 +201,31 @@ form.devswitch select {
     align-items: flex-end;
     margin-bottom: 0.75rem;
 }
-.filters label { font-size: 0.8rem; }
+.filters label { font-size: var(--fs-sm); }
 .filters input, .filters select { width: auto; min-width: 9rem; }
 .filters button { padding: 0.45rem 0.9rem; }
 
 tr.rowlink { cursor: pointer; }
-tr.rowlink:hover td { background: #f2efe8; }
+tr.rowlink:hover td { background: var(--hover); }
 .overdue { color: var(--bad); font-weight: bold; }
-.muted { color: #666; font-size: 0.85rem; }
+.muted { color: #666; font-size: var(--fs-sm); }
 
 .candidate {
     border: 1px solid var(--line);
     border-left: 5px solid var(--accent2);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 0.6rem 0.9rem;
     margin-bottom: 0.5rem;
     background: #fff;
 }
-.candidate .meta { font-size: 0.82rem; color: #555; }
+.candidate .meta { font-size: var(--fs-sm); color: var(--muted); }
 
 .itemrow {
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 0.75rem 1rem;
     margin-bottom: 0.75rem;
-    background: #fbfaf8;
+    background: var(--subtle);
 }
 .itemrow h4 { margin: 0 0 0.5rem; }
 
@@ -135,9 +234,9 @@ tr.rowlink:hover td { background: #f2efe8; }
 
 /* Administration is grouped, and the group holding the current screen is
    the one that opens, so the page starts on the work. */
-main:has(.adminnav) { max-width: 78rem; }
+body:has(.adminnav) { --page-w: 78rem; }
 
-@media (min-width: 62rem) {
+@media (min-width: 64rem) {
     main:has(.adminnav) {
         display: grid;
         grid-template-columns: 15rem minmax(0, 1fr);
@@ -159,7 +258,7 @@ main:has(.adminnav) { max-width: 78rem; }
 .adminnav { margin-bottom: 1rem; }
 .navgroup {
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--panel);
     margin-bottom: 0.5rem;
 }
@@ -167,21 +266,21 @@ main:has(.adminnav) { max-width: 78rem; }
     cursor: pointer;
     padding: 0.5rem 0.75rem;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     color: var(--accent);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
 }
-.navgroup[open] > summary { border-bottom: 1px solid var(--line); border-radius: 6px 6px 0 0; }
-.navgroup > summary:hover { background: #f2efe8; }
+.navgroup[open] > summary { border-bottom: 1px solid var(--line); border-radius: var(--radius-md) 6px 0 0; }
+.navgroup > summary:hover { background: var(--hover); }
 .navcount {
     font-weight: normal;
-    font-size: 0.75rem;
-    color: #6a6a6a;
-    background: #eceae5;
-    border-radius: 9px;
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    background: var(--fill);
+    border-radius: var(--radius-pill);
     padding: 0 0.45rem;
 }
 .navgroup ul { list-style: none; margin: 0; padding: 0.3rem; }
@@ -189,14 +288,14 @@ main:has(.adminnav) { max-width: 78rem; }
 .navgroup a {
     display: block;
     padding: 0.4rem 0.55rem;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--ink);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 .navgroup a strong { display: block; color: var(--accent); font-weight: 600; }
-.navgroup a .navhint { display: block; font-size: 0.75rem; color: #6a6a6a; line-height: 1.25; }
-.navgroup a:hover { background: #f2efe8; }
+.navgroup a .navhint { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.25; }
+.navgroup a:hover { background: var(--hover); }
 .navgroup a.active { background: var(--accent); }
 .navgroup a.active strong, .navgroup a.active .navhint { color: #fff; }
 .adminbody { min-width: 0; }
@@ -222,23 +321,23 @@ ul.typeahead li {
     padding: 0.4rem 0.6rem;
     cursor: pointer;
     border-bottom: 1px solid #eee;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 ul.typeahead li:last-child { border-bottom: none; }
-ul.typeahead li:hover, ul.typeahead li.active { background: #fff3e0; }
-ul.typeahead li.none { color: #6a6a6a; cursor: default; font-style: italic; }
+ul.typeahead li:hover, ul.typeahead li.active { background: var(--warm); }
+ul.typeahead li.none { color: var(--muted); cursor: default; font-style: italic; }
 ul.typeahead .ta-label { display: block; }
-ul.typeahead .ta-hint { display: block; font-size: 0.75rem; color: #6a6a6a; }
+ul.typeahead .ta-hint { display: block; font-size: var(--fs-xs); color: var(--muted); }
 /* Filled-from-the-account fields read as answers, not as questions. */
-input[readonly] { background: #eceae5; color: #33383f; }
+input[readonly] { background: var(--fill); color: #33383f; }
 
 /* A quiet line under the choices, not a queue standing in front of them. */
 .worknote {
-    background: #fff5ea;
+    background: var(--warm);
     border: 1px solid var(--accent2);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 0.55rem 0.9rem;
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     margin: 1rem 0 0.5rem;
 }
 .worknote a { color: var(--accent); font-weight: bold; }
@@ -258,28 +357,28 @@ ol.flowchart li {
     flex: 1 1 11rem;
     border: 1px solid var(--line);
     border-left: 4px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     padding: 0.45rem 0.6rem;
-    font-size: 0.82rem;
-    background: #fbfaf8;
+    font-size: var(--fs-sm);
+    background: var(--subtle);
 }
 ol.flowchart li::before {
     content: counter(stage) ". ";
-    color: #8a8a8a;
+    color: var(--muted);
     font-weight: bold;
 }
 ol.flowchart li strong { display: inline; }
-ol.flowchart li .muted { display: block; font-size: 0.75rem; }
+ol.flowchart li .muted { display: block; font-size: var(--fs-xs); }
 ol.flowchart li .stageowner {
     display: block;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
     margin-top: 0.15rem;
 }
 ol.flowchart li.done { border-left-color: var(--good); opacity: 0.7; }
 ol.flowchart li.now {
     border-left-color: var(--accent2);
-    background: #fff5ea;
+    background: var(--warm);
     box-shadow: 0 0 0 1px var(--accent2) inset;
 }
 ol.flowchart li.terminal { border-left-style: dashed; }
@@ -290,13 +389,13 @@ ol.flowchart li.terminal { border-left-style: dashed; }
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
-.filecard { margin: 0; font-size: 0.78rem; }
+.filecard { margin: 0; font-size: var(--fs-xs); }
 .filecard img {
     width: 100%;
     height: 7rem;
     object-fit: cover;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: #fff;
 }
 .filecard .filetype {
@@ -305,17 +404,17 @@ ol.flowchart li.terminal { border-left-style: dashed; }
     justify-content: center;
     height: 7rem;
     border: 1px solid var(--line);
-    border-radius: 4px;
-    background: #eceae5;
+    border-radius: var(--radius-sm);
+    background: var(--fill);
     font-weight: bold;
     color: var(--accent);
 }
 .filecard figcaption { margin-top: 0.25rem; word-break: break-word; }
-.filecard figcaption .muted { display: block; font-size: 0.72rem; }
+.filecard figcaption .muted { display: block; font-size: var(--fs-xs); }
 
 /* A move item that is not being moved stays visible but recedes. */
 tr.rowoff td { opacity: 0.45; }
-#itemtable input[type="text"], #itemtable input:not([type]), #itemtable select { font-size: 0.85rem; }
+#itemtable input[type="text"], #itemtable input:not([type]), #itemtable select { font-size: var(--fs-sm); }
 #itemtable td { vertical-align: middle; }
 .scroll-x { overflow-x: auto; }
 
@@ -347,7 +446,7 @@ tr.rowoff td { opacity: 0.45; }
     max-height: 34rem;
     background: #fdfdfb;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
 }
 #floorplan path.walls {
     fill: none;
@@ -367,8 +466,10 @@ tr.rowoff td { opacity: 0.45; }
 /* Hover and selection must beat the per room fill attribute. */
 #floorplan path.room:hover, #floorplan path.room:focus {
     fill: #ffd9a0 !important;
-    outline: none;
 }
+/* The keyboard ring stays: removing the outline left a room selectable by
+   keyboard with nothing on screen to say which one (PFR-18). */
+#floorplan path.room:focus-visible { outline: var(--focus); }
 #floorplan path.room.selected {
     fill: var(--accent2) !important;
     fill-opacity: 0.8;
@@ -405,43 +506,43 @@ tr.rowoff td { opacity: 0.45; }
     flex-wrap: wrap;
     gap: 0.35rem 0.9rem;
     margin: 0.5rem 0;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
 }
 .legenditem { display: inline-flex; align-items: center; gap: 0.3rem; }
 .swatch {
     display: inline-block;
     width: 0.9rem;
     height: 0.9rem;
-    border: 1px solid #8a8a8a;
-    border-radius: 2px;
+    border: 1px solid var(--muted);
+    border-radius: var(--radius-sm);
 }
 .swatch.safetyswatch {
     border: none;
     color: #0c5c2f;
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     line-height: 0.9rem;
     text-align: center;
 }
 .swatch.openswatch { border: 2px dashed var(--bad); background: transparent; }
 
-.subtabs a { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+.subtabs a { padding: 0.3rem 0.6rem; font-size: var(--fs-sm); }
 .tabbody { padding-top: 0.75rem; }
 .tabbody h4 { margin: 0.9rem 0 0.3rem; }
-.tabbody table { font-size: 0.82rem; }
+.tabbody table { font-size: var(--fs-sm); }
 
-main { max-width: 60rem; margin: 0 auto; padding: 1rem; }
+main { max-width: var(--page-w); margin: 0 auto; padding: 1rem; }
 
 .panel {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
 }
 .panel.ok  { border-left: 5px solid var(--good); }
 .panel.err { border-left: 5px solid var(--bad); }
 
-h2 { margin-top: 0; font-size: 1.15rem; }
+h2 { margin-top: 0; font-size: var(--fs-lg); }
 h3 { font-size: 1rem; }
 
 .good { color: var(--good); }
@@ -449,13 +550,13 @@ h3 { font-size: 1rem; }
 
 ul.flags li { margin-bottom: 0.4rem; }
 
-table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 0.9rem; }
+table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: var(--fs-md); }
 th, td { border: 1px solid var(--line); padding: 0.35rem 0.5rem; text-align: left; }
-th { background: #eceae5; }
+th { background: var(--fill); }
 
 fieldset {
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     margin: 0 0 1rem;
     padding: 0.75rem 1rem;
 }
@@ -470,7 +571,7 @@ legend { font-weight: bold; padding: 0 0.4rem; }
     .grid { grid-template-columns: 1fr 1fr; }
 }
 
-label { display: block; font-size: 0.9rem; }
+label { display: block; font-size: var(--fs-md); }
 label.check { margin-top: 0.6rem; }
 label.check input { margin-right: 0.4rem; }
 
@@ -480,20 +581,26 @@ input, select, textarea {
     padding: 0.45rem;
     margin-top: 0.2rem;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     font: inherit;
     background: #fff;
 }
 label.check input { display: inline; width: auto; }
 
-input:focus, select:focus, textarea:focus, button:focus, a:focus {
-    outline: 3px solid var(--accent2);
+/* The focus ring follows the keyboard, not the mouse: :focus put a thick
+   orange ring around every button a pointer touched (PFR-38). --focus is
+   the one ring the spec names, in the darker orange that reads against
+   both the paper and a navy header. */
+input:focus-visible, select:focus-visible, textarea:focus-visible,
+button:focus-visible, a:focus-visible, summary:focus-visible,
+[tabindex]:focus-visible {
+    outline: var(--focus);
     outline-offset: 1px;
 }
 
 .actions { margin-top: 1rem; }
 
-.lede { font-size: 1.05rem; max-width: 46rem; }
+.lede { font-size: var(--fs-lg); max-width: 46rem; }
 
 .cards {
     display: grid;
@@ -501,7 +608,7 @@ input:focus, select:focus, textarea:focus, button:focus, a:focus {
     gap: 1rem;
     margin: 1.25rem 0;
 }
-@media (min-width: 52rem) {
+@media (min-width: 60rem) {
     .cards { grid-template-columns: 1fr 1fr 1fr; }
 }
 
@@ -510,7 +617,7 @@ input:focus, select:focus, textarea:focus, button:focus, a:focus {
    phone it is the only navigation on the page. */
 details.area {
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--panel);
     margin: 0 0 0.9rem;
 }
@@ -529,7 +636,7 @@ details.area > summary::before {
     transition: transform 0.12s;
 }
 details.area[open] > summary::before { transform: rotate(90deg); }
-details.area > summary:hover { background: var(--shade, #f4f4f6); }
+details.area > summary:hover { background: var(--shade); }
 /* Title and description on one line, so four closed areas read as four
    choices rather than four paragraphs. On a phone the description drops
    under the title, where there is room for it. */
@@ -538,7 +645,7 @@ details.area > summary::before { flex: none; margin-right: 0; }
 .area-title { font-size: 1.2rem; font-weight: bold; flex: none; }
 .area-blurb {
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     flex: 1 1 16rem;
     min-width: 0;
 }
@@ -553,7 +660,7 @@ details.area .cards { margin: 0 1.1rem 1.1rem; }
     background: var(--panel);
     border: 1px dashed var(--line);
     border-top: 5px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 1rem 1.25rem;
     opacity: 0.75;
 }
@@ -563,7 +670,7 @@ details.area .cards { margin: 0 1.1rem 1.1rem; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-pill);
     padding: 0.1rem 0.4rem;
     vertical-align: middle;
     color: var(--muted);
@@ -581,7 +688,7 @@ a.button {
     display: inline-block;
     padding: 0.45rem 0.9rem;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--panel);
     color: var(--accent);
     text-decoration: none;
@@ -592,12 +699,12 @@ button.danger { color: var(--bad); border-color: var(--bad); }
 
 /* A command meant to be copied rather than read. */
 .snippet {
-    background: var(--shade, #f4f4f6);
+    background: var(--shade);
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     padding: 0.75rem 1rem;
     overflow-x: auto;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
 }
 
@@ -607,7 +714,7 @@ a.card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-top: 5px solid var(--accent);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 1rem 1.25rem;
     color: var(--ink);
     text-decoration: none;
@@ -616,20 +723,24 @@ a.card:hover, a.card:focus {
     border-top-color: var(--accent2);
     box-shadow: 0 2px 8px rgba(19, 41, 75, 0.25);
 }
-a.card h3 { margin: 0 0 0.5rem; color: var(--accent); font-size: 1.1rem; }
-a.card p { margin: 0 0 0.75rem; font-size: 0.92rem; }
+a.card h3 { margin: 0 0 0.5rem; color: var(--accent); font-size: var(--fs-lg); }
+a.card p { margin: 0 0 0.75rem; font-size: var(--fs-md); }
 a.card .go {
     margin-top: auto;
     font-weight: bold;
-    color: var(--accent2);
+    /* Orange text on a white card: --accent2 reads at about 3 to 1, which
+       fails. --il-altgeld is the same orange darkened to carry text. */
+    color: var(--il-altgeld);
 }
 
 .urgent { color: var(--bad); font-weight: bold; }
 .help { font-size: 0.88rem; }
 
 footer.foot {
-    margin: 1.5rem 0;
-    font-size: 0.85rem;
+    max-width: var(--page-w);
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+    font-size: var(--fs-sm);
     text-align: right;
 }
 footer.foot a { color: var(--accent); }
@@ -639,7 +750,7 @@ button, .btn {
     font: inherit;
     padding: 0.5rem 1.1rem;
     border: 1px solid var(--accent);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: #fff;
     color: var(--accent);
     cursor: pointer;
@@ -655,19 +766,19 @@ button:hover, .btn:hover { filter: brightness(1.15); }
    going to be pasted somewhere character for character, and a
    proportional font hides a stray space. */
 .recblock textarea {
-    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
-    font-size: 0.85rem;
+    font-family: var(--mono);
+    font-size: var(--fs-sm);
     line-height: 1.5;
-    background: #fbfaf8;
+    background: var(--subtle);
 }
 .rectotal {
     float: right;
-    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    font-family: var(--mono);
     font-weight: normal;
 }
-.copied { color: var(--good); margin-left: 0.6rem; font-size: 0.9rem; }
-#recall { font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
-          font-size: 0.85rem; background: #fbfaf8; }
+.copied { color: var(--good); margin-left: 0.6rem; font-size: var(--fs-md); }
+#recall { font-family: var(--mono);
+          font-size: var(--fs-sm); background: var(--subtle); }
 
 /* =====================================================================
    Data sheet mode.
@@ -684,25 +795,25 @@ button:hover, .btn:hover { filter: brightness(1.15); }
    narrow screen, because the same purchase sometimes gets filed from a
    field station on a laptop.
    ===================================================================== */
-body.sheet main { max-width: 82rem; }
+body.sheet { --page-w: 82rem; }
 
 body.sheet .panel { padding: 0.7rem 0.9rem; margin-bottom: 0.7rem; }
 body.sheet h2 { font-size: 1rem; margin-bottom: 0.4rem; }
-body.sheet h3 { font-size: 0.85rem; margin: 0.6rem 0 0.3rem; }
-body.sheet label { font-size: 0.72rem; color: #4a4a4a; line-height: 1.3; }
+body.sheet h3 { font-size: var(--fs-sm); margin: 0.6rem 0 0.3rem; }
+body.sheet label { font-size: var(--fs-xs); color: var(--muted); line-height: 1.3; }
 body.sheet input, body.sheet select, body.sheet textarea {
     padding: 0.25rem 0.35rem;
     margin-top: 0.08rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     line-height: 1.3;
 }
-body.sheet table { font-size: 0.82rem; margin: 0.3rem 0; }
+body.sheet table { font-size: var(--fs-sm); margin: 0.3rem 0; }
 body.sheet th, body.sheet td { padding: 0.2rem 0.3rem; }
 body.sheet table input, body.sheet table select { margin-top: 0; }
 body.sheet .actions { margin-top: 0.5rem; }
 body.sheet fieldset { padding: 0.4rem 0.7rem; margin-bottom: 0.5rem; }
 body.sheet p { margin: 0.3rem 0; }
-body.sheet .muted { font-size: 0.78rem; }
+body.sheet .muted { font-size: var(--fs-xs); }
 
 /* Two panels abreast, and three where there is room. The sheet's whole
    argument is that the buyer and the vendor are one glance, not two. */
@@ -734,11 +845,14 @@ body.sheet .fields textarea { resize: vertical; }
 /* The line tables carry the document. They are the one thing on the page
    allowed to be full width and to scroll on their own. */
 body.sheet .lines table { width: 100%; }
-body.sheet .lines th { font-size: 0.72rem; white-space: nowrap; }
+body.sheet .lines th { font-size: var(--fs-xs); white-space: nowrap; }
 body.sheet .lines input { width: 100%; }
 body.sheet .lines td.rowno { text-align: right; color: var(--muted); width: 1.6rem; }
 body.sheet .lines td.amount { text-align: right; white-space: nowrap; }
-body.sheet .lines .rowdel {
+/* One control for dropping a row nobody has saved yet (PFR-08). A row
+   already stored is removed by a button.danger that asks first; this one
+   needs no question, because nothing has been written. */
+.rowdel {
     border: none;
     background: none;
     color: var(--bad);
@@ -746,6 +860,7 @@ body.sheet .lines .rowdel {
     font-size: 1rem;
     padding: 0 0.2rem;
 }
+.rowdel:hover { color: var(--il-altgeld); filter: none; }
 
 /* The running totals sit with the table they total, not three sections
    away where nobody looks. */
@@ -756,7 +871,7 @@ body.sheet .lines .rowdel {
     flex-wrap: wrap;
     margin-top: 0.4rem;
 }
-.sheettotal .big { font-size: 1.05rem; font-weight: bold; }
+.sheettotal .big { font-size: var(--fs-lg); font-weight: bold; }
 .sheettotal .off { color: var(--bad); font-weight: bold; }
 .sheettotal .on  { color: var(--good); }
 
@@ -764,10 +879,10 @@ body.sheet .lines .rowdel {
 body.sheet details.hint { margin: 0.3rem 0; }
 body.sheet details.hint > summary {
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--accent);
 }
-body.sheet details.hint p { font-size: 0.8rem; color: #4a4a4a; }
+body.sheet details.hint p { font-size: var(--fs-sm); color: var(--muted); }
 
 /* On a sheet the submit is not the end of a scroll, it is the bottom of
    the page - so it stays there. The height it takes is given back at the
@@ -785,7 +900,7 @@ body.sheet .sheetsubmit {
     flex-wrap: wrap;
     z-index: 5;
 }
-body.sheet .sheetsubmit .running { font-size: 0.85rem; }
+body.sheet .sheetsubmit .running { font-size: var(--fs-sm); }
 body.sheet .sheetsubmit .running strong { font-size: 1rem; }
 
 /* The sheet gives back the margins a reading page needs and a document
@@ -793,7 +908,7 @@ body.sheet .sheetsubmit .running strong { font-size: 1rem; }
 body.sheet main { padding: 0.6rem 0.75rem 0; }
 body.sheet .sheetrow { gap: 0.6rem; margin-bottom: 0.6rem; }
 body.sheet header.site { padding: 0.55rem 1.25rem; }
-body.sheet header.site h1 { font-size: 1.15rem; }
+body.sheet header.site h1 { font-size: var(--fs-lg); }
 body.sheet .panel.lines { padding-bottom: 0.5rem; }
 body.sheet .fields textarea { min-height: 3.6rem; }
 
@@ -810,12 +925,12 @@ body.sheet .fields textarea { min-height: 3.6rem; }
     display: block;
     padding: 0.6rem 0.7rem;
     border: 1px solid var(--line);
-    border-radius: 5px;
-    background: #fbfaf8;
+    border-radius: var(--radius-md);
+    background: var(--subtle);
     text-decoration: none;
     color: inherit;
 }
-.stat:hover { background: #f2efe9; border-color: var(--accent); }
+.stat:hover { background: var(--hover); border-color: var(--accent); }
 .statn {
     display: block;
     font-size: 1.5rem;
@@ -823,16 +938,85 @@ body.sheet .fields textarea { min-height: 3.6rem; }
     line-height: 1.1;
     color: var(--accent);
 }
-.statl { display: block; font-size: 0.78rem; color: #4a4a4a; }
+.statl { display: block; font-size: var(--fs-xs); color: var(--muted); }
+
+/* ---------------------------------------------------------------------
+   Classes the pages have always emitted with nothing behind them. Each
+   one here renders as the component it was reaching for, so a page keeps
+   its markup and starts looking like the rest of the application. The
+   audit lists them as PFR-02 to PFR-07; docs/design.md section 3 names
+   the canonical component each alias points at.
+   --------------------------------------------------------------------- */
+
+/* PFR-02: eight pages write "panel error" for what the stylesheet calls
+   "panel err", so those panels carried no failure rule at all. */
+.panel.error { border-left: 5px solid var(--bad); }
+
+/* PFR-03: the filter rows are outlined buttons, and the one that matches
+   what is on screen is filled. Without these, every filter looked the
+   same and the active one was invisible. */
+.btn.secondary {
+    background: var(--panel);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+.btn.secondary:hover { background: var(--hover); filter: none; }
+.btn.secondary.on,
+.btn.secondary[aria-current="true"] {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+}
+/* PFR-07: a button that belongs inside a table cell. */
+.btn.small { padding: 0.2rem 0.5rem; font-size: var(--fs-sm); }
+
+/* PFR-05: the incident counts. "panel stats" is the stat grid and
+   "big" is the figure in it, which is what .statrow and .statn do. */
+.panel.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.6rem;
+}
+.panel.stats > div { text-align: left; }
+.big {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1.1;
+    color: var(--accent);
+}
+
+/* PFR-06: guidance and warning panels. A note reads as the work note it
+   is; a warning takes the same left rule as .panel.card-warn. */
+.panel.note {
+    background: var(--warm);
+    border-color: var(--accent2);
+}
+.panel.warn { border-left: 5px solid var(--bad); }
+p.warn { color: var(--bad); }
+tr.warn td { background: var(--warm); }
+
+/* PFR-07: the rest of the undefined set. */
+td.center, th.center { text-align: center; }
+/* button.link is gone: the two buttons that used it became .rowdel with
+   PFR-08, and a rule nothing reaches is a rule that drifts. */
+.radios { display: grid; gap: 0.35rem; margin: 0.35rem 0 0.75rem; }
+ul.timeline { list-style: none; padding-left: 0; margin: 0.5rem 0 0; }
+ul.timeline li {
+    border-left: 3px solid var(--line);
+    padding: 0.25rem 0 0.25rem 0.7rem;
+    margin: 0 0 0.35rem;
+}
+tr.done td { color: var(--muted); }
 
 /* Small forms that sit inside a table cell rather than owning a panel. */
 form.inline { display: flex; gap: 0.25rem; align-items: center; margin: 0; }
 form.inline input, form.inline select { margin: 0; width: auto; }
-form.inline button { padding: 0.2rem 0.5rem; font-size: 0.8rem; }
+form.inline button { padding: 0.2rem 0.5rem; font-size: var(--fs-sm); }
 
 ul.plain { list-style: none; padding-left: 0; }
 ul.plain li { margin-bottom: 0.4rem; }
-tr.warn td { background: #fdf6e3; }
+tr.warn td { background: var(--warm); }
 
 /* =====================================================================
    Phone mode: the mileage page.
@@ -841,22 +1025,23 @@ tr.warn td { background: #fdf6e3; }
    in gloves. Everything is bigger, there is less of it, and the one
    number that matters is the size of a number on a dashboard.
    ===================================================================== */
-body.phone main { max-width: 30rem; padding: 0.75rem; }
+body.phone { --page-w: 30rem; }
+body.phone main { padding: 0.75rem; }
 body.phone .panel { padding: 1rem; }
-body.phone label { font-size: 0.95rem; }
+body.phone label { font-size: var(--fs-md); }
 body.phone input, body.phone select {
     padding: 0.7rem 0.6rem;
-    font-size: 1.1rem;
+    font-size: var(--fs-lg);
 }
 body.phone .bigfield input {
     font-size: 2.2rem;
     font-weight: bold;
     letter-spacing: 0.06em;
     text-align: center;
-    font-family: "Cascadia Mono", Consolas, monospace;
+    font-family: var(--mono);
 }
 body.phone button.big, body.phone .btn.big {
-    font-size: 1.15rem;
+    font-size: var(--fs-lg);
     padding: 0.8rem 1.4rem;
     width: 100%;
 }
@@ -864,7 +1049,7 @@ body.phone .bignum {
     font-size: 2.4rem;
     font-weight: bold;
     margin: 0.2rem 0;
-    font-family: "Cascadia Mono", Consolas, monospace;
+    font-family: var(--mono);
 }
 body.phone .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
 body.phone .actions .btn { flex: 1 1 8rem; text-align: center; }
@@ -878,7 +1063,7 @@ body.phone details.panel summary { cursor: pointer; font-weight: bold; }
 }
 .label {
     border: 1px dashed #999;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     padding: 0.12in;
     display: flex;
     gap: 0.12in;
@@ -890,7 +1075,7 @@ body.phone details.panel summary { cursor: pointer; font-weight: bold; }
 .label .who { font-size: 9pt; line-height: 1.25; min-width: 0; }
 .label .fleetno { font-size: 15pt; font-weight: bold; display: block; }
 .label .what { color: #333; overflow-wrap: anywhere; }
-.label .say { font-size: 7.5pt; color: #555; margin-top: 0.04in; }
+.label .say { font-size: 7.5pt; color: var(--muted); margin-top: 0.04in; }
 
 @media print {
     header.site, nav, .noprint, footer { display: none !important; }
@@ -903,7 +1088,7 @@ body.phone details.panel summary { cursor: pointer; font-weight: bold; }
 /* The PRIOps lockup in the banner. */
 .brandmark { display: inline-flex; align-items: center; gap: .6rem;
              margin-bottom: .15rem; }
-.brandword { font-family: Arial, 'Segoe UI', sans-serif; font-weight: 800;
+.brandword { font-family: var(--brand-font); font-weight: 800;
              font-size: 1.7rem; letter-spacing: .06em; line-height: 1; }
 /* When the lockup is the heading it carries its own size, so the h1
    adds nothing but the browser's default margin and font size. */
@@ -929,17 +1114,31 @@ body.demo main { padding-top: 0.35rem; }
    along the bottom. It takes the whole window - a code editor in a
    60rem column would be a worse tool than the one it replaces. */
 
+/* The Studio is a flex column page, not a guess at the chrome height
+   (PFR-36). calc(100vh - 8.5rem) assumed the header and footer were
+   always 8.5rem; a wrapped header or the acting-user line made that
+   wrong, and the editor either overflowed the window or left a band of
+   paper under it. */
+body.studio {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 body.studio main {
     max-width: none;
     padding: 0;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .studio-wrap {
     display: flex;
     flex-direction: column;
-    /* The header and the campus footer keep their space; the Studio
-       takes everything between them and never scrolls as a page. */
-    height: calc(100vh - 8.5rem);
+    /* Takes what the page has left, and never scrolls as a page. */
+    flex: 1;
     min-height: 30rem;
     border-top: 1px solid var(--line);
 }
@@ -951,13 +1150,13 @@ body.studio main {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.5rem 0.9rem;
-    background: var(--paper, #f5f1e8);
+    background: var(--paper);
     border-bottom: 1px solid var(--line);
 }
 
-.studio-where { font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.studio-crumb { color: var(--muted, #6b7280); }
-.studio-idle  { color: var(--muted, #6b7280); font-style: italic; }
+.studio-where { font-size: var(--fs-md); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.studio-crumb { color: var(--muted); }
+.studio-idle  { color: var(--muted); font-style: italic; }
 
 .studio-actions { display: flex; align-items: center; gap: 0.6rem; flex: none; }
 
@@ -965,32 +1164,35 @@ body.studio main {
    and the live institute, and the difference matters more here than
    anywhere else in the application. */
 .studio-env {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 0.15rem 0.5rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--line);
-    color: var(--muted, #6b7280);
+    color: var(--muted);
 }
 .studio-env-production {
-    background: #fdece7;
-    border-color: #c7461f;
-    color: #8a3a12;
+    background: var(--warn-bg);
+    border-color: var(--il-altgeld);
+    color: var(--warn-text);
     font-weight: bold;
 }
 
+/* The Studio keeps its own class names, because its markup does, but it
+   hovers and fills like every other button in the application (PFR-11,
+   PFR-29): a filled button brightens, an outlined one fills. */
 .studio-save {
-    background: var(--navy, #13294b);
-    color: #fff;
-    border: 0;
-    border-radius: 4px;
+    background: var(--accent);
+    color: var(--on-accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
     padding: 0.4rem 1.1rem;
     font: inherit;
     font-weight: bold;
     cursor: pointer;
 }
-.studio-save:hover { background: #1d3f6e; }
+.studio-save:hover { filter: brightness(1.15); }
 
 /* Three regions, and only the middle one is allowed to be large. */
 .studio-body { flex: 1; display: flex; min-height: 0; }
@@ -1002,7 +1204,7 @@ body.studio main {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: #fbfaf7;
+    background: var(--subtle);
 }
 .studio-filter { flex: none; padding: 0.5rem; border-bottom: 1px solid var(--line); }
 .studio-filter input { width: 100%; box-sizing: border-box; font: inherit; padding: 0.35rem 0.5rem; }
@@ -1011,30 +1213,30 @@ body.studio main {
 .studio-group > summary {
     cursor: pointer;
     padding: 0.3rem 0.6rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: bold;
-    color: var(--navy, #13294b);
+    color: var(--navy);
     display: flex;
     justify-content: space-between;
     gap: 0.5rem;
 }
-.studio-group > summary:hover { background: #eef1f5; }
-.studio-count { color: var(--muted, #6b7280); font-weight: normal; }
+.studio-group > summary:hover { background: var(--hover); }
+.studio-count { color: var(--muted); font-weight: normal; }
 .studio-group ul { list-style: none; margin: 0 0 0.35rem; padding: 0; }
 
 .studio-file {
     display: block;
     padding: 0.22rem 0.6rem 0.22rem 1.4rem;
-    font-family: "Cascadia Mono", Consolas, monospace;
-    font-size: 0.82rem;
-    color: var(--ink, #2b2b2b);
+    font-family: var(--mono);
+    font-size: var(--fs-sm);
+    color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.studio-file:hover { background: #eef1f5; }
-.studio-file.active { background: var(--navy, #13294b); color: #fff; font-weight: bold; }
+.studio-file:hover { background: var(--hover); }
+.studio-file.active { background: var(--navy); color: #fff; font-weight: bold; }
 
 /* The editor. The gutter scrolls with the text rather than beside it,
    so a four hundred line file still lines up at the bottom. */
@@ -1055,24 +1257,23 @@ body.studio main {
 }
 .studio-gutter,
 .studio-editor textarea {
-    font-family: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
-    font-size: 0.85rem;
+    font-family: var(--mono);
+    font-size: var(--fs-sm);
     line-height: 1.5;
 }
 .studio-editor textarea {
     flex: 1;
     border: 0;
-    outline: 0;
     resize: none;
     padding: 0.6rem 0.8rem;
     tab-size: 4;
-    color: var(--ink, #2b2b2b);
+    color: var(--ink);
     min-width: 0;
 }
 
-.studio-empty { padding: 3rem 2rem; max-width: 34rem; color: var(--muted, #6b7280); }
-.studio-empty h2 { margin: 0 0 0.5rem; color: var(--navy, #13294b); }
-.studio-empty-note { font-size: 0.85rem; }
+.studio-empty { padding: 3rem 2rem; max-width: 34rem; color: var(--muted); }
+.studio-empty h2 { margin: 0 0 0.5rem; color: var(--navy); }
+.studio-empty-note { font-size: var(--fs-sm); }
 
 .studio-inspector {
     width: 17rem;
@@ -1080,29 +1281,29 @@ body.studio main {
     border-left: 1px solid var(--line);
     padding: 0.75rem 0.9rem;
     overflow-y: auto;
-    background: #fbfaf7;
-    font-size: 0.85rem;
+    background: var(--subtle);
+    font-size: var(--fs-sm);
 }
 .studio-inspector h3 {
     margin: 0 0 0.5rem;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--muted, #6b7280);
+    color: var(--muted);
 }
 .studio-inspector h3 + * { margin-top: 0; }
 .studio-inspector h3:not(:first-child) { margin-top: 1.25rem; }
-.studio-hint { color: var(--muted, #6b7280); }
+.studio-hint { color: var(--muted); }
 
 .studio-facts { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; margin: 0; }
-.studio-facts dt { color: var(--muted, #6b7280); }
-.studio-facts dd { margin: 0; font-family: "Cascadia Mono", Consolas, monospace; font-size: 0.8rem; }
+.studio-facts dt { color: var(--muted); }
+.studio-facts dd { margin: 0; font-family: var(--mono); font-size: var(--fs-sm); }
 
 .studio-warn {
-    background: #fdece7;
-    border-left: 3px solid #c7461f;
+    background: var(--warn-bg);
+    border-left: 3px solid var(--il-altgeld);
     padding: 0.5rem 0.6rem;
-    color: #8a3a12;
+    color: var(--warn-text);
 }
 
 .studio-backups { list-style: none; margin: 0; padding: 0; }
@@ -1113,36 +1314,37 @@ body.studio main {
     gap: 0.5rem;
     padding: 0.35rem 0;
 }
-.studio-when { flex: 1; font-size: 0.8rem; }
-.studio-when em { color: var(--muted, #6b7280); font-style: normal; }
-.studio-bytes { color: var(--muted, #6b7280); font-size: 0.75rem; }
+.studio-when { flex: 1; font-size: var(--fs-sm); }
+.studio-when em { color: var(--muted); font-style: normal; }
+.studio-bytes { color: var(--muted); font-size: var(--fs-xs); }
 .studio-restore {
     font: inherit;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     padding: 0.15rem 0.5rem;
-    border: 1px solid var(--line);
-    background: #fff;
-    border-radius: 3px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: var(--panel);
+    border-radius: var(--radius-sm);
     cursor: pointer;
 }
-.studio-restore:hover { background: var(--navy, #13294b); color: #fff; border-color: var(--navy, #13294b); }
+.studio-restore:hover { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 
 /* What just happened, along the foot, where a terminal would put it. */
 .studio-drawer {
     flex: none;
     border-top: 1px solid var(--line);
     padding: 0.5rem 0.9rem;
-    background: var(--paper, #f5f1e8);
-    font-size: 0.85rem;
+    background: var(--paper);
+    font-size: var(--fs-sm);
 }
-.studio-drawer.quiet .studio-note { color: var(--muted, #6b7280); }
+.studio-drawer.quiet .studio-note { color: var(--muted); }
 .studio-note { margin: 0; }
 .studio-note.studio-good { color: #1d7168; font-weight: bold; }
 .studio-note.studio-bad {
-    color: #8a3a12;
+    color: var(--warn-text);
     font-weight: bold;
-    font-family: "Cascadia Mono", Consolas, monospace;
-    font-size: 0.8rem;
+    font-family: var(--mono);
+    font-size: var(--fs-sm);
 }
 
 /* Narrow screens get the rail above the work rather than beside it -
@@ -1156,7 +1358,7 @@ body.studio main {
 
 /* The Studio link is marked, because it is not the back end and should
    not be mistaken for it on the way past. */
-nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
+nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, var(--il-altgeld)); }
 
 /* ---- Studio: the two halves, and where the databases live ---------- */
 
@@ -1165,57 +1367,57 @@ nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
 .studio-tabs { display: flex; gap: 0.15rem; flex: none; }
 .studio-tab {
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     padding: 0.3rem 0.9rem;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
-    color: var(--muted, #6b7280);
+    color: var(--muted);
     background: transparent;
 }
-.studio-tab:hover { background: #fff; color: inherit; }
+.studio-tab:hover { background: var(--hover); color: var(--ink); }
 .studio-tab.on {
-    background: var(--navy, #13294b);
-    border-color: var(--navy, #13294b);
-    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
     font-weight: bold;
 }
 
 .studio-dbbody { overflow: auto; }
 .studio-dbmain { flex: 1; min-width: 0; padding: 1.1rem 1.3rem; overflow: auto; }
-.studio-dbmain h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+.studio-dbmain h3 { margin: 0 0 0.6rem; font-size: var(--fs-lg); }
 
 /* Said plainly and once, at the top, because it is the whole reason the
    screen exists. */
 .studio-localdb {
-    background: #fdece7;
-    border: 1px solid #c7461f;
-    border-radius: 6px;
+    background: var(--warn-bg);
+    border: 1px solid var(--il-altgeld);
+    border-radius: var(--radius-md);
     padding: 0.9rem 1.1rem;
     margin-bottom: 1.2rem;
 }
-.studio-localdb h3 { margin: 0 0 0.5rem; color: #8a3a12; }
-.studio-localdb p  { margin: 0 0 0.6rem; font-size: 0.92rem; line-height: 1.5; }
+.studio-localdb h3 { margin: 0 0 0.5rem; color: var(--warn-text); }
+.studio-localdb p  { margin: 0 0 0.6rem; font-size: var(--fs-md); line-height: 1.5; }
 .studio-localdb p:last-child { margin-bottom: 0; }
 
-.studio-dbtable { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.studio-dbtable { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
 .studio-dbtable th {
     text-align: left;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--muted, #6b7280);
+    color: var(--muted);
     border-bottom: 1px solid var(--line);
     padding: 0.35rem 0.6rem 0.35rem 0;
 }
 .studio-dbtable td { padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .studio-dbtable tr.ok  td:nth-child(3) { color: #1d6f42; }
 .studio-dbtable tr.bad td:nth-child(3) { color: #a3200f; }
-.studio-dbtable td:last-child { text-align: right; white-space: nowrap; color: var(--muted, #6b7280); }
-.studio-dbwhat { display: block; font-size: 0.78rem; color: var(--muted, #6b7280); font-weight: normal; }
+.studio-dbtable td:last-child { text-align: right; white-space: nowrap; color: var(--muted); }
+.studio-dbwhat { display: block; font-size: var(--fs-xs); color: var(--muted); font-weight: normal; }
 
 .studio-dbform { overflow: auto; }
-.studio-dbform label { display: block; margin: 0 0 0.6rem; font-size: 0.85rem; font-weight: bold; }
+.studio-dbform label { display: block; margin: 0 0 0.6rem; font-size: var(--fs-sm); font-weight: bold; }
 .studio-dbform input[type=text], .studio-dbform input:not([type]),
 .studio-dbform input[type=number], .studio-dbform input[type=password],
 .studio-dbform select {
@@ -1224,9 +1426,9 @@ nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
     margin-top: 0.2rem;
     padding: 0.35rem 0.45rem;
     font: inherit;
-    font-size: 0.9rem;
+    font-size: var(--fs-md);
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: #fff;
 }
 .studio-dbform label.studio-check { font-weight: normal; display: flex; gap: 0.4rem; align-items: center; }
@@ -1243,7 +1445,7 @@ nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
     position: sticky;
     bottom: 0;
     padding: 0.6rem 0;
-    background: var(--paper, #f5f1e8);
+    background: var(--paper);
     border-top: 1px solid var(--line);
 }
 .studio-dbbuttons button { flex: 1; }
@@ -1252,3 +1454,75 @@ nav.mainnav a.navstudio { border-bottom: 2px solid var(--accent, #c7461f); }
     .studio-dbbody { flex-direction: column; }
     .studio-dbform { width: auto; max-height: none; }
 }
+
+/* ---------------------------------------------------------------------
+   PriDialog (docs/design.md section 4, Q-27). The application's own ask,
+   confirm and notify, in place of the browser's confirm() box, which
+   could not be styled and did not look like the application on a phone.
+   Tokens only: the shell is the panel look at --z-dialog over a navy
+   wash.
+   --------------------------------------------------------------------- */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-dialog);
+    background: rgba(19, 41, 75, .55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.dialog {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-1);
+    max-width: 28rem;
+    width: 100%;
+    padding: 1rem 1.25rem 1.25rem;
+}
+.dialog-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.dialog-head h2 { margin: 0 0 0.5rem; font-size: var(--fs-lg); color: var(--accent); }
+.dialog-x {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: var(--fs-xl);
+    line-height: 1;
+    padding: 0 0.2rem;
+    cursor: pointer;
+}
+.dialog-x:hover { color: var(--ink); filter: none; }
+.dialog-body p { margin: 0 0 0.75rem; }
+.dialog-body label { display: block; font-size: var(--fs-md); }
+.dialog-body input { width: 100%; }
+.dialog .actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Montserrat for headings, Source Sans for everything else (Q-017). */
+/* Montserrat for headings (Q-017). .brandword is left out on purpose:
+   the lockup keeps its own face and weight, see --brand-font. */
+h1, h2, h3, .statn { font-family: var(--font-heading); }
+
+/* ---------------------------------------------------------------------
+   The handful of layout helpers that replace the inline styles the pages
+   repeated (PFR-23). Each one earned its name by appearing often: a field
+   that spans a whole form row, a control that sits on the baseline of the
+   row above it, a form that flows inline with the text, and a group that
+   passes its grid through to its children.
+   --------------------------------------------------------------------- */
+.span-all { grid-column: 1 / -1; }
+.span-rest { grid-column: 2 / -1; }
+.end { align-self: end; }
+.flat { margin: 0; }
+.passthrough { display: contents; }
+.inline-block { display: inline; }
